@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#1e3a8a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Sistema Macolla - Finca Juriepe (Supabase)</title>
+  <!-- SUPABASE JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg-body: #f4f7f6; --bg-card: #ffffff; --bg-tabs: #f8f9fa; --text-main: #1f2937; --text-muted: #6b7280;
+      --border-color: #e5e7eb; --primary-color: #2563eb; --primary-gradient: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+      --header-gradient: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); --input-bg: #ffffff;
+    }
+    body.dark-mode {
+      --bg-body: #0f172a; --bg-card: #1e293b; --bg-tabs: #334155; --text-main: #f1f5f9; --text-muted: #94a3b8;
+      --border-color: #334155; --input-bg: #1e293b;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    html, body {
+      width: 100%; min-height: 100vh;
+      background: var(--bg-body); color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .container {
+      width: 100%; max-width: 1400px; margin: 0 auto;
+      background: var(--bg-card); min-height: 100vh;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      display: flex; flex-direction: column;
+    }
+
+    /* HEADER */
+    .header {
+      background: var(--header-gradient); color: white;
+      padding: 16px 20px; position: relative;
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+    }
+    .header-info h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: 0.5px; }
+    .header-info p { font-size: 0.8rem; opacity: 0.85; }
+    
+    .header-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .user-pill {
+      background: rgba(255,255,255,0.15); padding: 5px 12px; border-radius: 20px;
+      font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-top {
+      background: rgba(255,255,255,0.2); border: none; color: white;
+      padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 0.75rem;
+      font-weight: 600; transition: background 0.2s;
+    }
+    .btn-top:hover { background: rgba(255,255,255,0.35); }
+
+    /* BANNER ALERTA CONFIGURACIÓN */
+    #configWarningBanner {
+      background: #fef3c7; border-bottom: 1px solid #f59e0b; color: #92400e;
+      padding: 10px 15px; font-size: 0.85rem; display: none; align-items: center;
+      justify-content: space-between; gap: 10px;
+    }
+
+    /* PESTAÑAS */
+    .tabs {
+      display: flex; background: var(--bg-tabs); border-bottom: 2px solid var(--border-color);
+      overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 4px;
+    }
+    .tab-button {
+      flex: 0 0 auto; min-width: 95px; padding: 12px 14px; background: transparent;
+      border: none; cursor: pointer; font-size: 0.85rem; font-weight: 600;
+      color: var(--text-muted); transition: all 0.2s; border-bottom: 3px solid transparent;
+      white-space: nowrap; text-align: center;
+    }
+    .tab-button.active {
+      color: var(--primary-color); background: var(--bg-card);
+      border-bottom-color: var(--primary-color); border-radius: 6px 6px 0 0;
+    }
+
+    .tab-content { display: none; padding: 18px 16px; animation: fadeIn 0.2s ease; flex: 1; }
+    .tab-content.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* TARJETAS DE ESTADÍSTICAS */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 20px; }
+    .stat-card {
+      background: var(--primary-gradient); color: white; padding: 16px;
+      border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+    }
+    .stat-card h3 { font-size: 0.75rem; opacity: 0.9; margin-bottom: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-card .stat-value { font-size: 1.6rem; font-weight: 700; }
+    .stat-card.warning { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+    .stat-card.success { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+    .stat-card.info { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); }
+    .stat-card.purple { background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); }
+
+    /* FORMULARIOS Y BOTONES */
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 15px; }
+    .form-group { display: flex; flex-direction: column; }
+    .form-group label { font-weight: 600; margin-bottom: 5px; color: var(--text-main); font-size: 0.8rem; }
+    .form-group input, .form-group select {
+      padding: 10px; border: 2px solid var(--border-color); border-radius: 8px;
+      font-size: 0.9rem; background: var(--input-bg); color: var(--text-main); outline: none;
+    }
+    .form-group input:focus, .form-group select:focus { border-color: var(--primary-color); }
+
+    .btn {
+      padding: 10px 18px; border: none; border-radius: 8px; font-size: 0.9rem;
+      font-weight: 600; cursor: pointer; display: inline-flex; align-items: center;
+      gap: 6px; justify-content: center; transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.92; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary { background: var(--primary-gradient); color: white; }
+    .btn-secondary { background: #64748b; color: white; }
+    .btn-success { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; }
+    .btn-danger { background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); color: white; }
+
+    /* TABLAS */
+    .table-container {
+      width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
+      border-radius: 8px; border: 1px solid var(--border-color); margin-top: 12px;
+    }
+    table { width: 100%; border-collapse: collapse; background: var(--bg-card); min-width: 550px; }
+    thead { background: #1e293b; color: white; }
+    th, td { padding: 9px 12px; text-align: left; font-size: 0.82rem; border-bottom: 1px solid var(--border-color); }
+    tbody tr:hover { background: rgba(0,0,0,0.02); }
+
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; margin-top: 2px; }
+    .badge-success { background: #d1fae5; color: #065f46; }
+    .badge-warning { background: #fef3c7; color: #92400e; }
+    .badge-danger { background: #fee2e2; color: #991b1b; }
+    .badge-info { background: #dbeafe; color: #1e40af; }
+    .empty-state { text-align: center; padding: 25px 10px; color: var(--text-muted); font-style: italic; }
+
+    /* LOGIN */
+    #vistaLogin {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; padding: 20px; background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+    }
+    .login-card {
+      background: var(--bg-card); width: 100%; max-width: 420px;
+      padding: 35px 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      text-align: center;
+    }
+    .login-icon { font-size: 3rem; margin-bottom: 10px; }
+    .login-card h2 { font-size: 1.5rem; margin-bottom: 6px; color: var(--text-main); }
+    .login-card p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 25px; }
+
+    /* MODALES */
+    .modal-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.55); z-index: 9999; align-items: center; justify-content: center; padding: 15px;
+    }
+    .modal-box {
+      background: var(--bg-card); padding: 22px; border-radius: 14px;
+      width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    }
+
+    /* TOAST */
+    #toast-container { position: fixed; top: 15px; right: 15px; z-index: 99999; display: flex; flex-direction: column; gap: 8px; max-width: 90%; }
+    .toast { padding: 12px 18px; border-radius: 8px; color: white; font-weight: 600; font-size: 0.85rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: slideIn 0.3s ease; }
+    .toast.success { background: #10b981; }
+    .toast.error { background: #ef4444; }
+    .toast.warning { background: #f59e0b; }
+    .toast.info { background: #3b82f6; }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+    @media (max-width: 600px) {
+      .stats-grid { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: 1fr !important; }
+      .header-info h1 { font-size: 1.15rem; }
+    }
+  </style>
+</head>
+<body>
+  <div id="toast-container"></div>
+
+  <!-- PANTALLA LOGIN -->
+  <div id="vistaLogin">
+    <div class="login-card">
+      <div class="login-icon">🛶</div>
+      <h2>Sistema Macolla</h2>
+      <p>Finca Juriepe · Acceso Rápido (Supabase)</p>
+      <form id="formLogin" onsubmit="ejecutarLogin(event)">
+        <div class="form-group" style="text-align: left; margin-bottom: 15px;">
+          <label>Usuario</label>
+          <input type="text" id="loginUser" required placeholder="admin o caja" autocomplete="username">
+        </div>
+        <div class="form-group" style="text-align: left; margin-bottom: 22px;">
+          <label>Contraseña</label>
+          <input type="password" id="loginPass" required placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn-primary" id="btnLogin" style="width: 100%; padding: 12px;">
+          🔑 Iniciar Sesión
+        </button>
+      </form>
+      <div style="margin-top: 20px; font-size: 0.75rem; color: var(--text-muted);">
+        <button type="button" onclick="abrirModalConfig()" style="background: none; border: none; color: #3b82f6; cursor: pointer; font-size: 0.75rem;">⚙️ Configurar claves de Supabase</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANTALLA PRINCIPAL -->
+  <div id="vistaApp" style="display: none;">
+    <div class="container">
+      
+      <!-- AVISO DE CONFIGURACIÓN -->
+      <div id="configWarningBanner">
+        <span>⚠️ <strong>Falta configurar Supabase:</strong> Ingresa tu URL y clave de Supabase.</span>
+        <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.75rem;" onclick="abrirModalConfig()">Configurar</button>
+      </div>
+
+      <!-- HEADER -->
+      <div class="header">
+        <div class="header-info">
+          <h1>Sistema Macolla</h1>
+          <p>Finca Juriepe · Base de Datos Supabase</p>
+        </div>
+        <div class="header-actions">
+          <div class="user-pill" id="userPill">👤 Usuario</div>
+          <button class="btn-top" onclick="abrirModalConfig()" title="Configuración de Supabase">⚙️</button>
+          <button class="btn-top" onclick="toggleTheme()" id="themeBtn">🌙 Modo</button>
+          <button class="btn-top" onclick="cerrarSesion()" style="background: rgba(239,68,68,0.7);">🚪 Salir</button>
+        </div>
+      </div>
+
+      <!-- PESTAÑAS -->
+      <div class="tabs">
+        <button class="tab-button active solo-admin" onclick="showTab(event, 'dashboard')">📊 Dashboard</button>
+        <button class="tab-button" onclick="showTab(event, 'alquileres')">🛶 Alquileres</button>
+        <button class="tab-button" onclick="showTab(event, 'taquilla')">🎟️ Taquilla</button>
+        <button class="tab-button solo-admin" onclick="showTab(event, 'inventario')">📦 Inventario</button>
+        <button class="tab-button solo-admin" onclick="showTab(event, 'historial')">📜 Historial</button>
+        <button class="tab-button solo-admin" onclick="showTab(event, 'facturas')">🧾 Facturas</button>
+      </div>
+
+      <!-- DASHBOARD (SOLO ADMIN) -->
+      <div id="dashboard" class="tab-content active solo-admin">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+          <h2>Resumen del Sistema</h2>
+          <div class="form-grid" style="margin: 0; grid-template-columns: 1fr 1fr auto; align-items: end;">
+            <div class="form-group" style="margin: 0;"><label style="font-size:0.75rem;">Desde</label><input type="date" id="dashDesde" onchange="cargarDashboard()" style="padding:6px;"></div>
+            <div class="form-group" style="margin: 0;"><label style="font-size:0.75rem;">Hasta</label><input type="date" id="dashHasta" onchange="cargarDashboard()" style="padding:6px;"></div>
+            <button class="btn btn-primary" onclick="cargarDashboard()" style="padding:8px 12px; height:34px;">🔄</button>
+          </div>
+        </div>
+
+        <div class="stat-card" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); margin-bottom: 15px; text-align: center; padding: 20px;">
+          <h3 style="font-size: 0.95rem; letter-spacing: 1px;">INGRESO TOTAL DEL PERÍODO</h3>
+          <div class="stat-value" id="statIngresoTotal" style="font-size: 2.3rem;">$0</div>
+          <p style="font-size: 0.8rem; opacity: 0.9; margin-top: 3px;">Suma de alquileres, taquilla y ganancias de ventas</p>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card purple">
+            <h3>Alquiler Canoas</h3>
+            <div class="stat-value" id="statAlquilerRecaudo">$0</div>
+            <p style="font-size:0.8rem; margin-top:4px;" id="statAlquilerCant">0 canoas</p>
+            <p style="font-size:0.7rem; margin-top:4px; color:#fef08a;">🏆 Top: <span id="statTopCanoa">-</span></p>
+          </div>
+          <div class="stat-card info">
+            <h3>Taquilla Carros</h3>
+            <div class="stat-value" id="statCarrosRecaudo">$0</div>
+            <p style="font-size:0.8rem; margin-top:4px;" id="statCarrosCant">0 carros</p>
+          </div>
+          <div class="stat-card info">
+            <h3>Taquilla Turistas</h3>
+            <div class="stat-value" id="statTuristasRecaudo">$0</div>
+            <p style="font-size:0.8rem; margin-top:4px;" id="statTuristasCant">0 turistas</p>
+          </div>
+          <div class="stat-card info">
+            <h3>Paso Particulares</h3>
+            <div class="stat-value" id="statParticularesRecaudo">$0</div>
+            <p style="font-size:0.8rem; margin-top:4px;" id="statParticularesCant">0 particulares</p>
+          </div>
+          <div class="stat-card" style="background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%);">
+            <h3>Restaurante</h3>
+            <div class="stat-value" id="statRestauranteRecaudo">$0</div>
+            <p style="font-size:0.8rem; margin-top:4px;" id="statRestauranteCant">0 platos</p>
+            <p style="font-size:0.7rem; margin-top:4px; color:#fef3c7;" id="statRestauranteDesglose">-</p>
+          </div>
+          <div class="stat-card success">
+            <h3>Ingresos Ventas</h3>
+            <div class="stat-value" id="statValorVenta">$0</div>
+            <p style="font-size:0.8rem; margin-top:4px;">Dinero total en caja</p>
+            <p style="font-size:0.7rem; margin-top:6px; color:#d1fae5;" id="statDesgloseVentas">0 unidades</p>
+          </div>
+          <div class="stat-card" style="background: linear-gradient(135deg, #10b981 0%, #047857 100%);">
+            <h3>Ganancia Ventas</h3>
+            <div class="stat-value" id="statGanancia">$0</div>
+            <p style="font-size:0.8rem; margin-top:4px;">Utilidad real</p>
+            <p style="font-size:0.7rem; margin-top:6px; color:#a7f3d0;" id="statDesgloseGanancia">-</p>
+          </div>
+        </div>
+
+        <h3 style="margin: 15px 0 10px 0; font-size: 1.05rem;">Alertas de Inventario</h3>
+        <div class="stats-grid">
+          <div class="stat-card warning"><h3>Stock Bajo</h3><div class="stat-value" id="statStockBajo">0</div><p style="font-size:0.8rem;">Por debajo del mínimo</p></div>
+          <div class="stat-card warning"><h3>Sin Stock</h3><div class="stat-value" id="statSinStock">0</div><p style="font-size:0.8rem;">Agotados</p></div>
+        </div>
+      </div>
+
+      <!-- ALQUILERES -->
+      <div id="alquileres" class="tab-content">
+        <h2 style="margin-bottom: 15px; font-size: 1.25rem;">Registro de Alquiler de Canoas</h2>
+        <form id="formAlquiler" onsubmit="registrarAlquiler(event)">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="alquilerCanoa">Seleccionar Canoa</label>
+              <select id="alquilerCanoa" required onchange="calcularTotalAlquiler()">
+                <option value="">-- Seleccione --</option>
+              </select>
+            </div>
+            <div class="form-group"><label for="alquilerFecha">Fecha</label><input type="date" id="alquilerFecha" required></div>
+            <div class="form-group"><label for="alquilerCantidad">Cantidad</label><input type="number" id="alquilerCantidad" min="1" value="1" required oninput="calcularTotalAlquiler()"></div>
+            <div class="form-group"><label>Total a Cobrar</label><input type="text" id="alquilerTotal" readonly style="background:#e2e8f0; font-weight:bold; color:#1e293b;"></div>
+          </div>
+          <div class="form-group" style="margin-bottom:15px;"><label for="alquilerObs">Observaciones / Cliente</label><input type="text" id="alquilerObs" placeholder="Ej: Cliente Juan Pérez..."></div>
+          <button type="submit" class="btn btn-primary" id="btnAlquiler">Registrar Alquiler</button>
+        </form>
+        <div class="table-container">
+          <table>
+            <thead><tr><th>Fecha</th><th>Canoa</th><th>Cant.</th><th>Total</th><th>Observaciones</th></tr></thead>
+            <tbody id="tablaAlquileresBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAQUILLA -->
+      <div id="taquilla" class="tab-content">
+        <h2 style="margin-bottom: 15px; font-size: 1.25rem;">Registro de Taquilla</h2>
+        <form id="formTaquilla" onsubmit="registrarTaquilla(event)">
+          <div class="form-grid">
+            <div class="form-group"><label for="taquillaFecha">Fecha</label><input type="date" id="taquillaFecha" required></div>
+            <div class="form-group"><label for="taquillaCarros">Carros ($30.000)</label><input type="number" id="taquillaCarros" min="0" value="0" required></div>
+            <div class="form-group"><label for="taquillaTuristas">Turistas ($20.000)</label><input type="number" id="taquillaTuristas" min="0" value="0" required></div>
+            <div class="form-group"><label for="taquillaParticulares">Particulares ($10.000)</label><input type="number" id="taquillaParticulares" min="0" value="0" required></div>
+          </div>
+          
+          <h4 style="margin: 15px 0 8px 0; color: var(--text-muted); font-size: 0.95rem;">Restaurante ($25.000 c/u)</h4>
+          <div class="form-grid">
+            <div class="form-group"><label for="taquillaDesayunos">Desayunos</label><input type="number" id="taquillaDesayunos" min="0" value="0" required></div>
+            <div class="form-group"><label for="taquillaAlmuerzos">Almuerzos</label><input type="number" id="taquillaAlmuerzos" min="0" value="0" required></div>
+            <div class="form-group"><label for="taquillaComidas">Comidas</label><input type="number" id="taquillaComidas" min="0" value="0" required></div>
+          </div>
+          <button type="submit" class="btn btn-primary" id="btnTaquilla" style="margin-top: 10px;">Registrar Taquilla</button>
+        </form>
+        <div class="table-container">
+          <table>
+            <thead><tr><th>Fecha</th><th>Concepto</th><th>Cant.</th><th>Recaudo</th></tr></thead>
+            <tbody id="tablaTaquillaBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- INVENTARIO (ADMIN) -->
+      <div id="inventario" class="tab-content solo-admin">
+        <h2 style="margin-bottom: 15px; font-size: 1.25rem;">Inventario de Productos</h2>
+        <div class="form-grid">
+          <div class="form-group"><label>Buscar Producto</label><input type="text" id="buscarStock" placeholder="Código o nombre..." oninput="filtrarStock()"></div>
+          <div style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap;">
+             <button class="btn btn-primary" onclick="abrirModalMovimiento()">+ Movimiento</button>
+             <button class="btn btn-secondary" onclick="cargarInventario()">🔄 Actualizar</button>
+          </div>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead><tr><th>Cód.</th><th>Nombre</th><th>Stock</th><th>Costo</th><th>Venta</th><th>Estado</th><th>Acción</th></tr></thead>
+            <tbody id="tablaInventarioBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- HISTORIAL (ADMIN) -->
+      <div id="historial" class="tab-content solo-admin">
+        <h2 style="margin-bottom: 15px; font-size: 1.25rem;">Historial de Movimientos</h2>
+        <form id="formFiltros" onsubmit="cargarHistorial(event)">
+          <div class="form-grid">
+            <div class="form-group"><label>Desde</label><input type="date" id="fechaDesde" required></div>
+            <div class="form-group"><label>Hasta</label><input type="date" id="fechaHasta" required></div>
+            <div class="form-group" style="justify-content:flex-end;"><button type="submit" class="btn btn-primary">Filtrar</button></div>
+          </div>
+        </form>
+        <div class="table-container">
+          <table>
+            <thead><tr><th>Fecha</th><th>Tipo</th><th>Producto</th><th>Cant.</th><th>Total</th><th>Registrado Por</th></tr></thead>
+            <tbody id="tablaHistorialBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- FACTURAS (ADMIN) -->
+      <div id="facturas" class="tab-content solo-admin">
+        <h2 style="margin-bottom: 15px; font-size: 1.25rem;">Generar Factura de Venta</h2>
+        <form id="formFactura" onsubmit="generarFactura(event)">
+          <div class="form-grid">
+            <div class="form-group"><label>Cliente</label><input type="text" id="clienteFactura" required placeholder="Nombre o Razón Social"></div>
+            <div class="form-group"><label>NIT / Cédula</label><input type="text" id="nitFactura" required placeholder="C.C. o NIT"></div>
+          </div>
+          <div style="background:var(--bg-tabs); padding:14px; border-radius:10px; margin-bottom:15px; border: 1px solid var(--border-color);">
+            <div class="form-grid">
+              <div class="form-group"><label>Código Item</label><input type="text" id="codigoProductoItem" placeholder="Ej: 11, 1"></div>
+              <div class="form-group"><label>Cantidad</label><input type="number" id="cantidadItem" min="1" value="1"></div>
+              <div class="form-group" style="justify-content:flex-end;"><button type="button" class="btn btn-primary" onclick="agregarItem()">+ Agregar Item</button></div>
+            </div>
+            <div id="itemsList" style="margin-top:10px; font-size:0.85rem; color:var(--text-muted);">No hay items agregados</div>
+          </div>
+          <button type="submit" class="btn btn-success" id="btnFactura">🧾 Generar Factura</button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL: EDITAR PRODUCTO -->
+  <div id="modalEditarProducto" class="modal-overlay">
+    <div class="modal-box">
+      <h3 style="margin-bottom:12px; font-size: 1.2rem;">✏️ Editar Producto / Servicio</h3>
+      <form id="formEditarProducto" onsubmit="guardarEdicionProducto(event)">
+        <input type="hidden" id="editCodigo">
+        <div class="form-group" style="margin-bottom:10px;">
+          <label>Código</label>
+          <input type="text" id="editCodigoDisplay" disabled style="background:#e2e8f0; font-weight:bold;">
+        </div>
+        <div class="form-group" style="margin-bottom:10px;">
+          <label>Nombre del Producto / Servicio</label>
+          <input type="text" id="editNombre" required>
+        </div>
+        <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+          <div class="form-group"><label>Precio Costo ($)</label><input type="number" id="editPrecioCosto" min="0" step="any" required></div>
+          <div class="form-group"><label>Precio Venta ($)</label><input type="number" id="editPrecioVenta" min="0" step="any" required></div>
+        </div>
+        <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+          <div class="form-group"><label>Stock Mínimo</label><input type="number" id="editStockMin" min="0" required></div>
+          <div class="form-group"><label>Unidad</label><input type="text" id="editUnidad" placeholder="Unidades, Litros..."></div>
+        </div>
+        <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:12px;">
+          <div class="form-group"><label>Grupo</label><input type="text" id="editGrupo" placeholder="General, Bebidas..."></div>
+          <div class="form-group">
+            <label>Tipo</label>
+            <select id="editTipo" required>
+              <option value="INVENTARIO">INVENTARIO</option>
+              <option value="ALQUILER">ALQUILER</option>
+              <option value="SERVICIO">SERVICIO</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:16px;">
+          <label>Estado</label>
+          <select id="editEstado" required>
+            <option value="ACTIVO">ACTIVO</option>
+            <option value="INACTIVO">INACTIVO</option>
+          </select>
+        </div>
+        <div style="display:flex; gap:8px; justify-content:flex-end;">
+          <button type="button" class="btn btn-secondary" onclick="cerrarModalEditar()">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btnGuardarEdit">💾 Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: REGISTRAR MOVIMIENTO -->
+  <div id="modalMovimiento" class="modal-overlay">
+    <div class="modal-box">
+      <h3 style="margin-bottom:12px; font-size: 1.2rem;">Registrar Movimiento de Inventario</h3>
+      <form id="formMovimiento" onsubmit="registrarMovimiento(event)">
+        <div class="form-group" style="margin-bottom:12px;"><label>Producto</label><select id="movProducto" required></select></div>
+        <div class="form-grid">
+          <div class="form-group"><label>Tipo</label><select id="movTipo" required><option value="INGRESO">Compra / Entrada</option><option value="SALIDA">Venta / Salida</option></select></div>
+          <div class="form-group"><label>Cantidad</label><input type="number" id="movCantidad" min="1" required></div>
+        </div>
+        <div class="form-group" style="margin-bottom:15px;"><label>Observaciones</label><input type="text" id="movObs" placeholder="Ej: Compra proveedor..."></div>
+        <div style="display:flex; gap:8px; justify-content:flex-end;">
+          <button type="button" class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CONFIGURACIÓN SUPABASE -->
+  <div id="modalConfig" class="modal-overlay">
+    <div class="modal-box">
+      <h3 style="margin-bottom:10px; font-size: 1.2rem;">⚙️ Conexión con Supabase</h3>
+      <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">
+        Pega aquí los datos de tu proyecto de Supabase (Project Settings > API). Se guardan de forma segura en este navegador.
+      </p>
+      <div class="form-group" style="margin-bottom:12px;">
+        <label>Project URL</label>
+        <input type="text" id="inputSbUrl" placeholder="https://xyzcompany.supabase.co">
+      </div>
+      <div class="form-group" style="margin-bottom:15px;">
+        <label>API Key (anon public)</label>
+        <input type="text" id="inputSbKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+      </div>
+      <div style="display:flex; gap:8px; justify-content:flex-end;">
+        <button type="button" class="btn btn-secondary" onclick="cerrarModalConfig()">Cerrar</button>
+        <button type="button" class="btn btn-primary" onclick="guardarConfigSupabase()">Guardar Conexión</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT DE SUPABASE -->
+  <script>
+    // Configuración permanente de Supabase (Finca Juriepe)
+    const DEFAULT_SB_URL = "https://khopqjwrhjcrjodfuimi.supabase.co";
+    const DEFAULT_SB_KEY = "sb_publishable_EIiKkF27VodlWAZhs7ygoA_xm7Oz4Zm";
+
+    let sbClient = null;
+    let usuarioActual = null;
+    let stockGlobal = [];
+    let facturasItems = [];
+
+    function obtenerSbConfig() {
+      return {
+        url: localStorage.getItem('juriepe_sb_url') || DEFAULT_SB_URL,
+        key: localStorage.getItem('juriepe_sb_key') || DEFAULT_SB_KEY
+      };
+    }
+
+    function limpiarUrlSupabase(rawUrl) {
+      let u = (rawUrl || '').trim();
+      u = u.replace(/\/rest\/v1\/?$/, '');
+      u = u.replace(/\/+$/, '');
+      return u;
+    }
+
+    function initSupabase() {
+      const cfg = obtenerSbConfig();
+      if (cfg.url && cfg.key && window.supabase) {
+        const cleanUrl = limpiarUrlSupabase(cfg.url);
+        sbClient = window.supabase.createClient(cleanUrl, cfg.key);
+        document.getElementById('configWarningBanner').style.display = 'none';
+        return true;
+      } else {
+        document.getElementById('configWarningBanner').style.display = 'flex';
+        return false;
+      }
+    }
+
+    function mostrarAlerta(mensaje, tipo = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${tipo}`;
+      toast.innerHTML = `<span>${tipo === 'success' ? '✅' : tipo === 'error' ? '❌' : tipo === 'warning' ? '⚠️' : 'ℹ️'} ${mensaje}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3500);
+    }
+
+    /* ==================== LOGIN Y ROLES ==================== */
+    async function ejecutarLogin(event) {
+      event.preventDefault();
+      if (!initSupabase()) {
+        abrirModalConfig();
+        return mostrarAlerta('Primero debes configurar las claves de Supabase', 'warning');
+      }
+
+      const user = document.getElementById('loginUser').value.trim().toLowerCase();
+      const pass = document.getElementById('loginPass').value.trim();
+      const btn = document.getElementById('btnLogin');
+      btn.disabled = true; btn.textContent = 'Verificando...';
+
+      try {
+        const { data, error } = await sbClient
+          .from('usuarios')
+          .select('*')
+          .eq('usuario', user)
+          .eq('password', pass)
+          .eq('estado', 'ACTIVO')
+          .maybeSingle();
+
+        btn.disabled = false; btn.textContent = '🔑 Iniciar Sesión';
+
+        if (error) throw error;
+        if (!data) return mostrarAlerta('Usuario o contraseña incorrectos', 'error');
+
+        usuarioActual = data;
+        localStorage.setItem('juriepe_sb_user', JSON.stringify(usuarioActual));
+        mostrarAlerta(`Bienvenido, ${usuarioActual.nombre}`, 'success');
+        iniciarAppConUsuario();
+      } catch (err) {
+        btn.disabled = false; btn.textContent = '🔑 Iniciar Sesión';
+        mostrarAlerta('Error de inicio de sesión: ' + err.message, 'error');
+      }
+    }
+
+    function iniciarAppConUsuario() {
+      if (!usuarioActual) return;
+      document.getElementById('vistaLogin').style.display = 'none';
+      document.getElementById('vistaApp').style.display = 'block';
+
+      const badgeIcon = usuarioActual.rol === 'ADMIN' ? '👑' : '👤';
+      document.getElementById('userPill').textContent = `${badgeIcon} ${usuarioActual.nombre} (${usuarioActual.rol})`;
+
+      const elementosAdmin = document.querySelectorAll('.solo-admin');
+      if (usuarioActual.rol === 'ADMIN') {
+        elementosAdmin.forEach(el => el.style.display = '');
+        showTab(null, 'dashboard');
+      } else {
+        elementosAdmin.forEach(el => el.style.display = 'none');
+        showTab(null, 'alquileres');
+      }
+    }
+
+    function cerrarSesion() {
+      if (confirm('¿Deseas cerrar tu sesión?')) {
+        usuarioActual = null;
+        localStorage.removeItem('juriepe_sb_user');
+        document.getElementById('vistaApp').style.display = 'none';
+        document.getElementById('vistaLogin').style.display = 'flex';
+        document.getElementById('formLogin').reset();
+      }
+    }
+
+    /* ==================== PESTAÑAS ==================== */
+    function showTab(event, tabName) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+      
+      const tabEl = document.getElementById(tabName);
+      if (tabEl) tabEl.classList.add('active');
+      if (event) event.currentTarget.classList.add('active');
+      else {
+        const btn = Array.from(document.querySelectorAll('.tab-button')).find(b => b.getAttribute('onclick')?.includes(tabName));
+        if (btn) btn.classList.add('active');
+      }
+
+      if (tabName === 'dashboard' && usuarioActual?.rol === 'ADMIN') cargarDashboard();
+      else if (tabName === 'alquileres') cargarAlquileres();
+      else if (tabName === 'taquilla') cargarTaquilla();
+      else if (tabName === 'inventario' && usuarioActual?.rol === 'ADMIN') cargarInventario();
+    }
+
+    /* ==================== DASHBOARD (ULTRA RÁPIDO) ==================== */
+    async function cargarDashboard() {
+      if (!initSupabase()) return;
+      const desde = document.getElementById('dashDesde').value;
+      const hasta = document.getElementById('dashHasta').value;
+
+      try {
+        const [{ data: movs, error: errM }, { data: prods, error: errP }] = await Promise.all([
+          sbClient.from('movimientos').select('*').gte('fecha', desde).lte('fecha', hasta),
+          sbClient.from('productos').select('*')
+        ]);
+
+        if (errM || errP) throw (errM || errP);
+
+        const prodMap = {};
+        (prods || []).forEach(p => { prodMap[p.codigo] = p; });
+
+        let alquilerRecaudo = 0, alquilerCanoas = 0;
+        let carrosRecaudo = 0, carrosCant = 0;
+        let turistasRecaudo = 0, turistasCant = 0;
+        let particularesRecaudo = 0, particularesCant = 0;
+        let restauranteRecaudo = 0, restauranteCant = 0;
+        let gananciaVentas = 0, valorTotalVentas = 0, unidadesVentas = 0;
+        let canoasCount = {}, detalleComida = { "Desayuno": 0, "Almuerzo": 0, "Comida": 0 };
+        let ventasPorProducto = {};
+
+        (movs || []).forEach(m => {
+          if (m.tipo === 'SALIDA') {
+            const prod = prodMap[m.codigo] || {};
+            const tipoP = prod.tipo || 'INVENTARIO';
+            const nom = (prod.nombre || '').toLowerCase();
+
+            if (tipoP === 'ALQUILER') {
+              alquilerRecaudo += parseFloat(m.ganancia || 0);
+              alquilerCanoas += parseFloat(m.cantidad || 0);
+              canoasCount[prod.nombre] = (canoasCount[prod.nombre] || 0) + parseFloat(m.cantidad || 0);
+            } else if (tipoP === 'SERVICIO') {
+              if (nom.includes('particular')) {
+                particularesRecaudo += parseFloat(m.ganancia || 0);
+                particularesCant += parseFloat(m.cantidad || 0);
+              } else if (nom.includes('carro')) {
+                carrosRecaudo += parseFloat(m.ganancia || 0);
+                carrosCant += parseFloat(m.cantidad || 0);
+              } else if (nom.includes('turista')) {
+                turistasRecaudo += parseFloat(m.ganancia || 0);
+                turistasCant += parseFloat(m.cantidad || 0);
+              } else if (nom.includes('desayuno') || nom.includes('almuerzo') || nom.includes('comida')) {
+                restauranteRecaudo += parseFloat(m.ganancia || 0);
+                restauranteCant += parseFloat(m.cantidad || 0);
+                if (nom.includes('desayuno')) detalleComida['Desayuno'] += parseFloat(m.cantidad || 0);
+                else if (nom.includes('almuerzo')) detalleComida['Almuerzo'] += parseFloat(m.cantidad || 0);
+                else if (nom.includes('comida')) detalleComida['Comida'] += parseFloat(m.cantidad || 0);
+              }
+            } else if (tipoP === 'INVENTARIO') {
+              gananciaVentas += parseFloat(m.ganancia || 0);
+              const pv = parseFloat(m.precio_venta || prod.precio_venta || 0);
+              valorTotalVentas += (parseFloat(m.cantidad || 0) * pv);
+              unidadesVentas += parseFloat(m.cantidad || 0);
+              ventasPorProducto[prod.nombre] = (ventasPorProducto[prod.nombre] || 0) + parseFloat(m.cantidad || 0);
+            }
+          }
+        });
+
+        // Top Canoa
+        let topCanoa = { nombre: '-', cantidad: 0 };
+        for (let c in canoasCount) {
+          if (canoasCount[c] > topCanoa.cantidad) topCanoa = { nombre: c, cantidad: canoasCount[c] };
+        }
+
+        const ingresoTotal = alquilerRecaudo + carrosRecaudo + turistasRecaudo + particularesRecaudo + restauranteRecaudo + valorTotalVentas;
+
+        document.getElementById('statIngresoTotal').textContent = `$${ingresoTotal.toLocaleString('es-CO')}`;
+        document.getElementById('statAlquilerRecaudo').textContent = `$${alquilerRecaudo.toLocaleString('es-CO')}`;
+        document.getElementById('statAlquilerCant').textContent = `${alquilerCanoas} canoas alquiladas`;
+        document.getElementById('statTopCanoa').textContent = `${topCanoa.nombre} (${topCanoa.cantidad} veces)`;
+
+        document.getElementById('statCarrosRecaudo').textContent = `$${carrosRecaudo.toLocaleString('es-CO')}`;
+        document.getElementById('statCarrosCant').textContent = `${carrosCant} carros`;
+
+        document.getElementById('statTuristasRecaudo').textContent = `$${turistasRecaudo.toLocaleString('es-CO')}`;
+        document.getElementById('statTuristasCant').textContent = `${turistasCant} turistas`;
+
+        document.getElementById('statParticularesRecaudo').textContent = `$${particularesRecaudo.toLocaleString('es-CO')}`;
+        document.getElementById('statParticularesCant').textContent = `${particularesCant} particulares`;
+
+        document.getElementById('statRestauranteRecaudo').textContent = `$${restauranteRecaudo.toLocaleString('es-CO')}`;
+        document.getElementById('statRestauranteCant').textContent = `${restauranteCant} platos`;
+        const desgloseRest = Object.keys(detalleComida).filter(k => detalleComida[k] > 0).map(k => `${k}: ${detalleComida[k]}`).join(', ');
+        document.getElementById('statRestauranteDesglose').textContent = desgloseRest || 'Sin registros';
+
+        document.getElementById('statValorVenta').textContent = `$${valorTotalVentas.toLocaleString('es-CO')}`;
+        const desgloseV = Object.keys(ventasPorProducto).map(k => `${k}: ${ventasPorProducto[k]}`).join(', ');
+        document.getElementById('statDesgloseVentas').innerHTML = `${unidadesVentas} unidades<br><span style="font-size:0.65rem;">${desgloseV || 'Sin ventas'}</span>`;
+
+        document.getElementById('statGanancia').textContent = `$${gananciaVentas.toLocaleString('es-CO')}`;
+        document.getElementById('statDesgloseGanancia').innerHTML = `Utilidad: ${desgloseV || '-'}`;
+
+      } catch (err) {
+        mostrarAlerta('Error cargando dashboard: ' + err.message, 'error');
+      }
+    }
+
+    /* ==================== ALQUILERES ==================== */
+    async function cargarAlquileres() {
+      if (!initSupabase()) return;
+      const hoy = new Date().toISOString().split('T')[0];
+      document.getElementById('alquilerFecha').value = hoy;
+
+      try {
+        const { data: canoas } = await sbClient.from('productos').select('*').eq('tipo', 'ALQUILER').order('nombre');
+        const select = document.getElementById('alquilerCanoa');
+        select.innerHTML = '<option value="">-- Seleccione Canoa --</option>';
+        (canoas || []).forEach(p => {
+          select.innerHTML += `<option value="${p.codigo}" data-precio="${p.precio_venta}" data-nombre="${p.nombre}">${p.nombre} ($${parseFloat(p.precio_venta).toLocaleString('es-CO')})</option>`;
+        });
+        cargarTablaAlquileres();
+      } catch (e) {}
+    }
+
+    function calcularTotalAlquiler() {
+      const select = document.getElementById('alquilerCanoa');
+      const cant = parseFloat(document.getElementById('alquilerCantidad').value) || 0;
+      const precio = select.options[select.selectedIndex]?.getAttribute('data-precio') || 0;
+      const total = cant * parseFloat(precio);
+      document.getElementById('alquilerTotal').value = `$${total.toLocaleString('es-CO')}`;
+    }
+
+    async function registrarAlquiler(event) {
+      event.preventDefault();
+      if (!initSupabase()) return;
+
+      const select = document.getElementById('alquilerCanoa');
+      const codigo = select.value;
+      const precioVenta = parseFloat(select.options[select.selectedIndex]?.getAttribute('data-precio') || 0);
+      const cant = parseFloat(document.getElementById('alquilerCantidad').value) || 1;
+      const fecha = document.getElementById('alquilerFecha').value;
+      const obs = document.getElementById('alquilerObs').value;
+      const btn = document.getElementById('btnAlquiler');
+      btn.disabled = true; btn.textContent = 'Registrando...';
+
+      const ganancia = precioVenta * cant;
+
+      try {
+        const { error } = await sbClient.from('movimientos').insert([{
+          codigo: codigo,
+          fecha: fecha,
+          tipo: 'SALIDA',
+          cantidad: cant,
+          usuario: usuarioActual ? usuarioActual.nombre : 'Sistema',
+          observaciones: obs,
+          precio_costo: 0,
+          precio_venta: precioVenta,
+          ganancia: ganancia
+        }]);
+
+        btn.disabled = false; btn.textContent = 'Registrar Alquiler';
+        if (error) throw error;
+
+        mostrarAlerta('Alquiler registrado con éxito', 'success');
+        document.getElementById('formAlquiler').reset();
+        document.getElementById('alquilerFecha').value = fecha;
+        calcularTotalAlquiler();
+        cargarTablaAlquileres();
+        if (usuarioActual.rol === 'ADMIN') cargarDashboard();
+      } catch (err) {
+        btn.disabled = false; btn.textContent = 'Registrar Alquiler';
+        mostrarAlerta('Error: ' + err.message, 'error');
+      }
+    }
+
+    async function cargarTablaAlquileres() {
+      const hoy = new Date().toISOString().split('T')[0];
+      try {
+        const { data: movs } = await sbClient.from('movimientos').select('*').eq('fecha', hoy).eq('tipo', 'SALIDA').order('id', { ascending: false });
+        const { data: prods } = await sbClient.from('productos').select('codigo, nombre, tipo');
+        const prodMap = {};
+        (prods || []).forEach(p => { prodMap[p.codigo] = p; });
+
+        const tbody = document.getElementById('tablaAlquileresBody');
+        const filtered = (movs || []).filter(m => prodMap[m.codigo]?.tipo === 'ALQUILER');
+
+        if (filtered.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No hay alquileres registrados hoy</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = filtered.map(m => `
+          <tr>
+            <td>${m.fecha}</td>
+            <td>${prodMap[m.codigo]?.nombre || m.codigo}</td>
+            <td>${m.cantidad}</td>
+            <td>$${parseFloat(m.ganancia || 0).toLocaleString('es-CO')}</td>
+            <td>${m.observaciones || '-'}</td>
+          </tr>
+        `).join('');
+      } catch (e) {}
+    }
+
+    /* ==================== TAQUILLA ==================== */
+    async function cargarTaquilla() {
+      const hoy = new Date().toISOString().split('T')[0];
+      document.getElementById('taquillaFecha').value = hoy;
+      try {
+        const { data: movs } = await sbClient.from('movimientos').select('*').eq('fecha', hoy).eq('tipo', 'SALIDA').order('id', { ascending: false });
+        const { data: prods } = await sbClient.from('productos').select('codigo, nombre, tipo');
+        const prodMap = {};
+        (prods || []).forEach(p => { prodMap[p.codigo] = p; });
+
+        const tbody = document.getElementById('tablaTaquillaBody');
+        const filtered = (movs || []).filter(m => prodMap[m.codigo]?.tipo === 'SERVICIO');
+
+        if (filtered.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="4" class="empty-state">No hay registros de taquilla hoy</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = filtered.map(m => `
+          <tr>
+            <td>${m.fecha}</td>
+            <td>${prodMap[m.codigo]?.nombre || m.codigo}</td>
+            <td>${m.cantidad}</td>
+            <td>$${parseFloat(m.ganancia || 0).toLocaleString('es-CO')}</td>
+          </tr>
+        `).join('');
+      } catch (e) {}
+    }
+
+    async function registrarTaquilla(event) {
+      event.preventDefault();
+      if (!initSupabase()) return;
+
+      const fecha = document.getElementById('taquillaFecha').value;
+      const carros = parseInt(document.getElementById('taquillaCarros').value) || 0;
+      const turistas = parseInt(document.getElementById('taquillaTuristas').value) || 0;
+      const particulares = parseInt(document.getElementById('taquillaParticulares').value) || 0;
+      const desayunos = parseInt(document.getElementById('taquillaDesayunos').value) || 0;
+      const almuerzos = parseInt(document.getElementById('taquillaAlmuerzos').value) || 0;
+      const comidas = parseInt(document.getElementById('taquillaComidas').value) || 0;
+
+      if (carros === 0 && turistas === 0 && particulares === 0 && desayunos === 0 && almuerzos === 0 && comidas === 0) {
+        return mostrarAlerta('Debe registrar al menos 1 valor', 'warning');
+      }
+
+      const btn = document.getElementById('btnTaquilla');
+      btn.disabled = true; btn.textContent = 'Registrando...';
+
+      const usuarioNom = usuarioActual ? usuarioActual.nombre : 'Sistema';
+      const movimientos = [];
+      if (carros > 0) movimientos.push({ codigo: '13', cantidad: carros, fecha, tipo: 'SALIDA', observaciones: 'Taquilla Carros', precio_venta: 30000, ganancia: carros * 30000, usuario: usuarioNom });
+      if (turistas > 0) movimientos.push({ codigo: '14', cantidad: turistas, fecha, tipo: 'SALIDA', observaciones: 'Taquilla Turistas', precio_venta: 20000, ganancia: turistas * 20000, usuario: usuarioNom });
+      if (particulares > 0) movimientos.push({ codigo: '18', cantidad: particulares, fecha, tipo: 'SALIDA', observaciones: 'Paso Particulares', precio_venta: 10000, ganancia: particulares * 10000, usuario: usuarioNom });
+      if (desayunos > 0) movimientos.push({ codigo: '15', cantidad: desayunos, fecha, tipo: 'SALIDA', observaciones: 'Restaurante Desayuno', precio_venta: 25000, ganancia: desayunos * 25000, usuario: usuarioNom });
+      if (almuerzos > 0) movimientos.push({ codigo: '16', cantidad: almuerzos, fecha, tipo: 'SALIDA', observaciones: 'Restaurante Almuerzo', precio_venta: 25000, ganancia: almuerzos * 25000, usuario: usuarioNom });
+      if (comidas > 0) movimientos.push({ codigo: '17', cantidad: comidas, fecha, tipo: 'SALIDA', observaciones: 'Restaurante Comida', precio_venta: 25000, ganancia: comidas * 25000, usuario: usuarioNom });
+
+      try {
+        const { error } = await sbClient.from('movimientos').insert(movimientos);
+        btn.disabled = false; btn.textContent = 'Registrar Taquilla';
+        if (error) throw error;
+
+        mostrarAlerta('Taquilla registrada con éxito', 'success');
+        ['taquillaCarros', 'taquillaTuristas', 'taquillaParticulares', 'taquillaDesayunos', 'taquillaAlmuerzos', 'taquillaComidas'].forEach(id => {
+          document.getElementById(id).value = 0;
+        });
+        cargarTaquilla();
+        if (usuarioActual.rol === 'ADMIN') cargarDashboard();
+      } catch (err) {
+        btn.disabled = false; btn.textContent = 'Registrar Taquilla';
+        mostrarAlerta('Error: ' + err.message, 'error');
+      }
+    }
+
+    /* ==================== INVENTARIO (ADMIN) ==================== */
+    async function cargarInventario() {
+      if (!initSupabase()) return;
+      try {
+        const [{ data: prods }, { data: movs }] = await Promise.all([
+          sbClient.from('productos').select('*').order('nombre'),
+          sbClient.from('movimientos').select('codigo, tipo, cantidad')
+        ]);
+
+        const stockMap = {};
+        (movs || []).forEach(m => {
+          const cod = m.codigo;
+          const cant = parseFloat(m.cantidad || 0);
+          if (!stockMap[cod]) stockMap[cod] = 0;
+          if (m.tipo === 'INGRESO' || m.tipo === 'AJUSTE_POSITIVO' || m.tipo === 'AJUSTE') stockMap[cod] += cant;
+          else if (m.tipo === 'SALIDA' || m.tipo === 'AJUSTE_NEGATIVO') stockMap[cod] -= cant;
+        });
+
+        stockGlobal = (prods || []).filter(p => p.tipo === 'INVENTARIO').map(p => ({
+          ...p,
+          cantidad: Math.max(0, stockMap[p.codigo] || 0)
+        }));
+
+        filtrarStock();
+      } catch (err) {
+        mostrarAlerta('Error cargando inventario: ' + err.message, 'error');
+      }
+    }
+
+    function filtrarStock() {
+      const t = document.getElementById('buscarStock').value.toLowerCase();
+      const tbody = document.getElementById('tablaInventarioBody');
+      const filtered = stockGlobal.filter(p => p.nombre.toLowerCase().includes(t) || p.codigo.toLowerCase().includes(t));
+      if (filtered.length === 0) { tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No se encontraron productos</td></tr>'; return; }
+      tbody.innerHTML = filtered.map(p => {
+        let badge = p.cantidad <= 0 ? 'badge-danger' : (p.cantidad <= p.stock_min && p.stock_min > 0 ? 'badge-warning' : 'badge-success');
+        let txt = p.cantidad <= 0 ? 'Agotado' : (p.cantidad <= p.stock_min && p.stock_min > 0 ? 'Bajo' : 'Normal');
+        return `<tr>
+          <td><strong>${p.codigo}</strong></td>
+          <td>${p.nombre}</td>
+          <td><strong>${p.cantidad}</strong><br><span class="badge ${badge}">${txt}</span></td>
+          <td>$${parseFloat(p.precio_costo || 0).toLocaleString('es-CO')}</td>
+          <td>$${parseFloat(p.precio_venta || 0).toLocaleString('es-CO')}</td>
+          <td><span class="badge ${p.estado === 'ACTIVO' ? 'badge-success' : 'badge-danger'}">${p.estado}</span></td>
+          <td>
+            <div style="display:flex; gap:4px; flex-wrap:nowrap;">
+              <button class="btn btn-primary" style="padding:4px 8px; font-size:0.75rem;" onclick="abrirModalMovimiento('${p.codigo}')" title="Registrar Movimiento">Mov.</button>
+              <button class="btn btn-secondary" style="padding:4px 8px; font-size:0.75rem; background:#4b5563; color:white;" onclick="abrirModalEditar('${p.codigo}')" title="Editar Producto">✏️</button>
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    /* EDICIÓN DE PRODUCTOS */
+    function abrirModalEditar(codigo) {
+      const prod = stockGlobal.find(p => p.codigo.toString() === codigo.toString());
+      if (!prod) return mostrarAlerta('Producto no encontrado', 'error');
+
+      document.getElementById('editCodigo').value = prod.codigo;
+      document.getElementById('editCodigoDisplay').value = prod.codigo;
+      document.getElementById('editNombre').value = prod.nombre;
+      document.getElementById('editPrecioCosto').value = prod.precio_costo;
+      document.getElementById('editPrecioVenta').value = prod.precio_venta;
+      document.getElementById('editStockMin').value = prod.stock_min;
+      document.getElementById('editUnidad').value = prod.unidad || 'Unidades';
+      document.getElementById('editGrupo').value = prod.grupo || 'General';
+      document.getElementById('editTipo').value = prod.tipo || 'INVENTARIO';
+      document.getElementById('editEstado').value = prod.estado || 'ACTIVO';
+
+      document.getElementById('modalEditarProducto').style.display = 'flex';
+    }
+
+    function cerrarModalEditar() {
+      document.getElementById('modalEditarProducto').style.display = 'none';
+    }
+
+    async function guardarEdicionProducto(event) {
+      event.preventDefault();
+      const codigo = document.getElementById('editCodigo').value;
+      const btn = document.getElementById('btnGuardarEdit');
+      btn.disabled = true; btn.textContent = 'Guardando...';
+
+      const updates = {
+        nombre: document.getElementById('editNombre').value.trim(),
+        precio_costo: parseFloat(document.getElementById('editPrecioCosto').value) || 0,
+        precio_venta: parseFloat(document.getElementById('editPrecioVenta').value) || 0,
+        stock_min: parseInt(document.getElementById('editStockMin').value) || 0,
+        unidad: document.getElementById('editUnidad').value.trim(),
+        grupo: document.getElementById('editGrupo').value.trim(),
+        tipo: document.getElementById('editTipo').value,
+        estado: document.getElementById('editEstado').value
+      };
+
+      try {
+        const { error } = await sbClient.from('productos').update(updates).eq('codigo', codigo);
+        btn.disabled = false; btn.textContent = '💾 Guardar Cambios';
+        if (error) throw error;
+
+        mostrarAlerta('Producto actualizado con éxito', 'success');
+        cerrarModalEditar();
+        cargarInventario();
+        cargarDashboard();
+      } catch (err) {
+        btn.disabled = false; btn.textContent = '💾 Guardar Cambios';
+        mostrarAlerta('Error: ' + err.message, 'error');
+      }
+    }
+
+    /* MODAL MOVIMIENTO */
+    function abrirModalMovimiento(codigo = '') {
+      document.getElementById('modalMovimiento').style.display = 'flex';
+      const select = document.getElementById('movProducto');
+      select.innerHTML = '<option value="">-- Seleccione --</option>';
+      stockGlobal.forEach(p => { select.innerHTML += `<option value="${p.codigo}">${p.nombre}</option>`; });
+      if (codigo) select.value = codigo;
+    }
+
+    function cerrarModal() { document.getElementById('modalMovimiento').style.display = 'none'; }
+
+    async function registrarMovimiento(event) {
+      event.preventDefault();
+      const codigo = document.getElementById('movProducto').value;
+      const tipo = document.getElementById('movTipo').value;
+      const cantidad = parseFloat(document.getElementById('movCantidad').value) || 1;
+      const obs = document.getElementById('movObs').value;
+      const prod = stockGlobal.find(p => p.codigo === codigo) || {};
+
+      const precioCosto = parseFloat(prod.precio_costo || 0);
+      const precioVenta = parseFloat(prod.precio_venta || 0);
+      const ganancia = (tipo === 'SALIDA') ? (precioVenta - precioCosto) * cantidad : 0;
+
+      try {
+        const { error } = await sbClient.from('movimientos').insert([{
+          codigo,
+          fecha: new Date().toISOString().split('T')[0],
+          tipo,
+          cantidad,
+          observaciones: obs,
+          usuario: usuarioActual ? usuarioActual.nombre : 'Sistema',
+          precio_costo: precioCosto,
+          precio_venta: precioVenta,
+          ganancia: ganancia
+        }]);
+
+        if (error) throw error;
+        mostrarAlerta('Movimiento registrado', 'success');
+        cerrarModal();
+        cargarInventario();
+        cargarDashboard();
+      } catch (err) {
+        mostrarAlerta('Error: ' + err.message, 'error');
+      }
+    }
+
+    /* ==================== HISTORIAL ==================== */
+    async function cargarHistorial(event) {
+      if (event) event.preventDefault();
+      const desde = document.getElementById('fechaDesde').value;
+      const hasta = document.getElementById('fechaHasta').value;
+
+      try {
+        const [{ data: movs }, { data: prods }] = await Promise.all([
+          sbClient.from('movimientos').select('*').gte('fecha', desde).lte('fecha', hasta).order('fecha', { ascending: false }),
+          sbClient.from('productos').select('codigo, nombre')
+        ]);
+
+        const prodMap = {};
+        (prods || []).forEach(p => { prodMap[p.codigo] = p.nombre; });
+
+        const tbody = document.getElementById('tablaHistorialBody');
+        if (!movs || movs.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No hay movimientos</td></tr>'; return; }
+
+        tbody.innerHTML = movs.map(m => `
+          <tr>
+            <td>${m.fecha}</td>
+            <td><span class="badge badge-info">${m.tipo}</span></td>
+            <td>${prodMap[m.codigo] || m.codigo}</td>
+            <td>${m.cantidad}</td>
+            <td>$${parseFloat(m.ganancia || 0).toLocaleString('es-CO')}</td>
+            <td>${m.usuario || '-'}</td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        mostrarAlerta('Error: ' + err.message, 'error');
+      }
+    }
+
+    /* ==================== FACTURAS ==================== */
+    async function agregarItem() {
+      const codigo = document.getElementById('codigoProductoItem').value.trim();
+      const cantidad = parseFloat(document.getElementById('cantidadItem').value) || 0;
+      if (!codigo || cantidad <= 0) return mostrarAlerta('Datos inválidos', 'warning');
+
+      try {
+        const { data: prod } = await sbClient.from('productos').select('*').eq('codigo', codigo).maybeSingle();
+        if (!prod) return mostrarAlerta('Producto no encontrado', 'error');
+
+        const existente = facturasItems.find(i => i.codigo === codigo);
+        if (existente) existente.cantidad += cantidad;
+        else facturasItems.push({ codigo: prod.codigo, nombre: prod.nombre, cantidad: cantidad, precioUnitario: parseFloat(prod.precio_venta || 0) });
+
+        renderItems();
+        document.getElementById('codigoProductoItem').value = '';
+        document.getElementById('cantidadItem').value = '1';
+      } catch (e) {}
+    }
+
+    function renderItems() {
+      const div = document.getElementById('itemsList');
+      if (facturasItems.length === 0) { div.innerHTML = 'No hay items agregados'; return; }
+      div.innerHTML = facturasItems.map((i, idx) => `
+        <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-card); padding:6px 10px; border-radius:5px; margin-bottom:5px; border:1px solid var(--border-color);">
+          <span style="font-size:0.8rem;">${i.cantidad}x ${i.nombre} - $${(i.cantidad * i.precioUnitario).toLocaleString('es-CO')}</span>
+          <button type="button" class="btn btn-danger" style="padding:2px 6px;" onclick="facturasItems.splice(${idx},1); renderItems();">X</button>
+        </div>
+      `).join('');
+    }
+
+    async function generarFactura(event) {
+      event.preventDefault();
+      if (facturasItems.length === 0) return mostrarAlerta('Agregue al menos un item', 'warning');
+
+      const cliente = document.getElementById('clienteFactura').value;
+      const nit = document.getElementById('nitFactura').value;
+      const numeroFactura = `FAC-${Date.now()}`;
+      const total = facturasItems.reduce((acc, i) => acc + (i.cantidad * i.precioUnitario), 0);
+
+      try {
+        const { error } = await sbClient.from('facturas').insert([{
+          numero_factura: numeroFactura,
+          cliente,
+          nit,
+          total,
+          items: facturasItems,
+          usuario: usuarioActual ? usuarioActual.nombre : 'Sistema'
+        }]);
+
+        if (error) throw error;
+
+        mostrarAlerta(`Factura ${numeroFactura} guardada con éxito`, 'success');
+        
+        // Ventana de impresión limpia
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+          <html><head><title>${numeroFactura}</title><style>
+            body { font-family: Arial, sans-serif; padding: 25px; color: #1e293b; }
+            h1 { color: #1e3a8a; margin-bottom: 5px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+            th, td { border: 1px solid #cbd5e1; padding: 8px; font-size: 12px; }
+            th { background: #1e3a8a; color: white; }
+          </style></head><body>
+            <h1>MACOLLA - Finca Juriepe</h1>
+            <p><strong>Factura:</strong> ${numeroFactura} | <strong>Fecha:</strong> ${new Date().toLocaleDateString('es-CO')}</p>
+            <p><strong>Cliente:</strong> ${cliente} | <strong>NIT/CC:</strong> ${nit}</p>
+            <table>
+              <thead><tr><th>Cód.</th><th>Descripción</th><th>Cant.</th><th>Unitario</th><th>Subtotal</th></tr></thead>
+              <tbody>
+                ${facturasItems.map(i => `<tr><td>${i.codigo}</td><td>${i.nombre}</td><td>${i.cantidad}</td><td>$${i.precioUnitario.toLocaleString('es-CO')}</td><td>$${(i.cantidad * i.precioUnitario).toLocaleString('es-CO')}</td></tr>`).join('')}
+              </tbody>
+            </table>
+            <h2 style="text-align:right; margin-top:15px; color:#1e3a8a;">TOTAL: $${total.toLocaleString('es-CO')}</h2>
+            <script>window.print();<\/script>
+          </body></html>
+        `);
+        printWindow.document.close();
+
+        facturasItems = []; renderItems();
+        document.getElementById('formFactura').reset();
+      } catch (err) {
+        mostrarAlerta('Error guardando factura: ' + err.message, 'error');
+      }
+    }
+
+    /* ==================== CONFIGURACIÓN ==================== */
+    function abrirModalConfig() {
+      const cfg = obtenerSbConfig();
+      document.getElementById('inputSbUrl').value = cfg.url;
+      document.getElementById('inputSbKey').value = cfg.key;
+      document.getElementById('modalConfig').style.display = 'flex';
+    }
+
+    function cerrarModalConfig() {
+      document.getElementById('modalConfig').style.display = 'none';
+    }
+
+    function guardarConfigSupabase() {
+      const url = limpiarUrlSupabase(document.getElementById('inputSbUrl').value.trim());
+      const key = document.getElementById('inputSbKey').value.trim();
+
+      if (!url || !key) return mostrarAlerta('Debes ingresar URL y Key', 'warning');
+
+      localStorage.setItem('juriepe_sb_url', url);
+      localStorage.setItem('juriepe_sb_key', key);
+      cerrarModalConfig();
+      mostrarAlerta('Configuración guardada', 'success');
+      initSupabase();
+    }
+
+    /* ==================== TEMA ==================== */
+    function toggleTheme() {
+      document.body.classList.toggle('dark-mode');
+      const isDark = document.body.classList.contains('dark-mode');
+      document.getElementById('themeBtn').textContent = isDark ? '☀️ Modo' : '🌙 Modo';
+      localStorage.setItem('juriepe_sb_theme', isDark ? 'dark' : 'light');
+    }
+
+    /* ==================== INICIALIZACIÓN ==================== */
+    window.onload = () => {
+      if (localStorage.getItem('juriepe_sb_theme') === 'dark') {
+        document.body.classList.add('dark-mode');
+        document.getElementById('themeBtn').textContent = '☀️ Modo';
+      }
+
+      const hoy = new Date().toISOString().split('T')[0];
+      if (document.getElementById('dashDesde')) document.getElementById('dashDesde').value = hoy;
+      if (document.getElementById('dashHasta')) document.getElementById('dashHasta').value = hoy;
+      if (document.getElementById('fechaDesde')) document.getElementById('fechaDesde').value = hoy;
+      if (document.getElementById('fechaHasta')) document.getElementById('fechaHasta').value = hoy;
+
+      initSupabase();
+
+      const sesion = localStorage.getItem('juriepe_sb_user');
+      if (sesion) {
+        try {
+          usuarioActual = JSON.parse(sesion);
+          iniciarAppConUsuario();
+        } catch (e) {
+          localStorage.removeItem('juriepe_sb_user');
+        }
+      }
+    };
+  </script>
+</body>
+</html>

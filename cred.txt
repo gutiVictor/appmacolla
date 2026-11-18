@@ -1,0 +1,8 @@
+https://khopqjwrhjcrjodfuimi.supabase.co/rest/v1/
+
+
+NEXT_PUBLIC_SUPABASE_URL=https://khopqjwrhjcrjodfuimi.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_EIiKkF27VodlWAZhs7ygoA_xm7Oz4Zm
+
+
+admin y admin123.
