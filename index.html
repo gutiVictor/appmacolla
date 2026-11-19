@@ -1092,16 +1092,17 @@
         return mostrarAlerta('Primero debes configurar las claves de Supabase', 'warning');
       }
 
-      const user = document.getElementById('loginUser').value.trim().toLowerCase();
+      const userInput = document.getElementById('loginUser').value.trim();
       const pass = document.getElementById('loginPass').value.trim();
       const btn = document.getElementById('btnLogin');
       btn.disabled = true; btn.textContent = 'Verificando...';
 
       try {
+        // Buscamos sin distinguir mayúsculas/minúsculas en el usuario (ilike)
         const { data, error } = await sbClient
           .from('usuarios')
           .select('*')
-          .eq('usuario', user)
+          .ilike('usuario', userInput)
           .eq('password', pass)
           .eq('estado', 'ACTIVO')
           .maybeSingle();
