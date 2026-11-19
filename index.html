@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -11,171 +12,507 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
-      --bg-body: #f4f7f6; --bg-card: #ffffff; --bg-tabs: #f8f9fa; --text-main: #1f2937; --text-muted: #6b7280;
-      --border-color: #e5e7eb; --primary-color: #2563eb; --primary-gradient: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-      --header-gradient: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); --input-bg: #ffffff;
+      --bg-body: #f4f7f6;
+      --bg-card: #ffffff;
+      --bg-tabs: #f8f9fa;
+      --text-main: #1f2937;
+      --text-muted: #6b7280;
+      --border-color: #e5e7eb;
+      --primary-color: #2563eb;
+      --primary-gradient: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+      --header-gradient: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+      --input-bg: #ffffff;
     }
+
     body.dark-mode {
-      --bg-body: #0f172a; --bg-card: #1e293b; --bg-tabs: #334155; --text-main: #f1f5f9; --text-muted: #94a3b8;
-      --border-color: #334155; --input-bg: #1e293b;
+      --bg-body: #0f172a;
+      --bg-card: #1e293b;
+      --bg-tabs: #334155;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+      --input-bg: #1e293b;
     }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    
-    html, body {
-      width: 100%; min-height: 100vh;
-      background: var(--bg-body); color: var(--text-main);
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-height: 100vh;
+      background: var(--bg-body);
+      color: var(--text-main);
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       transition: background 0.2s, color 0.2s;
     }
 
     .container {
-      width: 100%; max-width: 1400px; margin: 0 auto;
-      background: var(--bg-card); min-height: 100vh;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      display: flex; flex-direction: column;
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      background: var(--bg-card);
+      min-height: 100vh;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      display: flex;
+      flex-direction: column;
     }
 
     /* HEADER */
     .header {
-      background: var(--header-gradient); color: white;
-      padding: 16px 20px; position: relative;
-      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+      background: var(--header-gradient);
+      color: white;
+      padding: 16px 20px;
+      position: relative;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
     }
-    .header-info h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: 0.5px; }
-    .header-info p { font-size: 0.8rem; opacity: 0.85; }
-    
-    .header-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+    .header-info h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .header-info p {
+      font-size: 0.8rem;
+      opacity: 0.85;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
     .user-pill {
-      background: rgba(255,255,255,0.15); padding: 5px 12px; border-radius: 20px;
-      font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
+
     .btn-top {
-      background: rgba(255,255,255,0.2); border: none; color: white;
-      padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 0.75rem;
-      font-weight: 600; transition: background 0.2s;
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 600;
+      transition: background 0.2s;
     }
-    .btn-top:hover { background: rgba(255,255,255,0.35); }
+
+    .btn-top:hover {
+      background: rgba(255, 255, 255, 0.35);
+    }
 
     /* BANNER ALERTA CONFIGURACIÓN */
     #configWarningBanner {
-      background: #fef3c7; border-bottom: 1px solid #f59e0b; color: #92400e;
-      padding: 10px 15px; font-size: 0.85rem; display: none; align-items: center;
-      justify-content: space-between; gap: 10px;
+      background: #fef3c7;
+      border-bottom: 1px solid #f59e0b;
+      color: #92400e;
+      padding: 10px 15px;
+      font-size: 0.85rem;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
     }
 
     /* PESTAÑAS */
     .tabs {
-      display: flex; background: var(--bg-tabs); border-bottom: 2px solid var(--border-color);
-      overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 4px;
-    }
-    .tab-button {
-      flex: 0 0 auto; min-width: 95px; padding: 12px 14px; background: transparent;
-      border: none; cursor: pointer; font-size: 0.85rem; font-weight: 600;
-      color: var(--text-muted); transition: all 0.2s; border-bottom: 3px solid transparent;
-      white-space: nowrap; text-align: center;
-    }
-    .tab-button.active {
-      color: var(--primary-color); background: var(--bg-card);
-      border-bottom-color: var(--primary-color); border-radius: 6px 6px 0 0;
+      display: flex;
+      background: var(--bg-tabs);
+      border-bottom: 2px solid var(--border-color);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 4px;
     }
 
-    .tab-content { display: none; padding: 18px 16px; animation: fadeIn 0.2s ease; flex: 1; }
-    .tab-content.active { display: block; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    .tab-button {
+      flex: 0 0 auto;
+      min-width: 95px;
+      padding: 12px 14px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: all 0.2s;
+      border-bottom: 3px solid transparent;
+      white-space: nowrap;
+      text-align: center;
+    }
+
+    .tab-button.active {
+      color: var(--primary-color);
+      background: var(--bg-card);
+      border-bottom-color: var(--primary-color);
+      border-radius: 6px 6px 0 0;
+    }
+
+    .tab-content {
+      display: none;
+      padding: 18px 16px;
+      animation: fadeIn 0.2s ease;
+      flex: 1;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(4px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
 
     /* TARJETAS DE ESTADÍSTICAS */
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 20px; }
-    .stat-card {
-      background: var(--primary-gradient); color: white; padding: 16px;
-      border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
     }
-    .stat-card h3 { font-size: 0.75rem; opacity: 0.9; margin-bottom: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-    .stat-card .stat-value { font-size: 1.6rem; font-weight: 700; }
-    .stat-card.warning { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
-    .stat-card.success { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
-    .stat-card.info { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); }
-    .stat-card.purple { background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); }
+
+    .stat-card {
+      background: var(--primary-gradient);
+      color: white;
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+    }
+
+    .stat-card h3 {
+      font-size: 0.75rem;
+      opacity: 0.9;
+      margin-bottom: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-card .stat-value {
+      font-size: 1.6rem;
+      font-weight: 700;
+    }
+
+    .stat-card.warning {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+
+    .stat-card.success {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    .stat-card.info {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    }
+
+    .stat-card.purple {
+      background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+    }
 
     /* FORMULARIOS Y BOTONES */
-    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 15px; }
-    .form-group { display: flex; flex-direction: column; }
-    .form-group label { font-weight: 600; margin-bottom: 5px; color: var(--text-main); font-size: 0.8rem; }
-    .form-group input, .form-group select {
-      padding: 10px; border: 2px solid var(--border-color); border-radius: 8px;
-      font-size: 0.9rem; background: var(--input-bg); color: var(--text-main); outline: none;
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 12px;
+      margin-bottom: 15px;
     }
-    .form-group input:focus, .form-group select:focus { border-color: var(--primary-color); }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group label {
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: var(--text-main);
+      font-size: 0.8rem;
+    }
+
+    .form-group input,
+    .form-group select {
+      padding: 10px;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      background: var(--input-bg);
+      color: var(--text-main);
+      outline: none;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: var(--primary-color);
+    }
 
     .btn {
-      padding: 10px 18px; border: none; border-radius: 8px; font-size: 0.9rem;
-      font-weight: 600; cursor: pointer; display: inline-flex; align-items: center;
-      gap: 6px; justify-content: center; transition: opacity 0.2s;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      justify-content: center;
+      transition: opacity 0.2s;
     }
-    .btn:hover { opacity: 0.92; }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-primary { background: var(--primary-gradient); color: white; }
-    .btn-secondary { background: #64748b; color: white; }
-    .btn-success { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; }
-    .btn-danger { background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); color: white; }
+
+    .btn:hover {
+      opacity: 0.92;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: var(--primary-gradient);
+      color: white;
+    }
+
+    .btn-secondary {
+      background: #64748b;
+      color: white;
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+      color: white;
+    }
 
     /* TABLAS */
     .table-container {
-      width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
-      border-radius: 8px; border: 1px solid var(--border-color); margin-top: 12px;
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      margin-top: 12px;
     }
-    table { width: 100%; border-collapse: collapse; background: var(--bg-card); min-width: 550px; }
-    thead { background: #1e293b; color: white; }
-    th, td { padding: 9px 12px; text-align: left; font-size: 0.82rem; border-bottom: 1px solid var(--border-color); }
-    tbody tr:hover { background: rgba(0,0,0,0.02); }
 
-    .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; margin-top: 2px; }
-    .badge-success { background: #d1fae5; color: #065f46; }
-    .badge-warning { background: #fef3c7; color: #92400e; }
-    .badge-danger { background: #fee2e2; color: #991b1b; }
-    .badge-info { background: #dbeafe; color: #1e40af; }
-    .empty-state { text-align: center; padding: 25px 10px; color: var(--text-muted); font-style: italic; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--bg-card);
+      min-width: 550px;
+    }
+
+    thead {
+      background: #1e293b;
+      color: white;
+    }
+
+    th,
+    td {
+      padding: 9px 12px;
+      text-align: left;
+      font-size: 0.82rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    tbody tr:hover {
+      background: rgba(0, 0, 0, 0.02);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .badge-success {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .badge-warning {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .badge-danger {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .badge-info {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 25px 10px;
+      color: var(--text-muted);
+      font-style: italic;
+    }
 
     /* LOGIN */
     #vistaLogin {
-      display: flex; align-items: center; justify-content: center;
-      min-height: 100vh; padding: 20px; background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
     }
+
     .login-card {
-      background: var(--bg-card); width: 100%; max-width: 420px;
-      padding: 35px 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      background: var(--bg-card);
+      width: 100%;
+      max-width: 420px;
+      padding: 35px 30px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
       text-align: center;
     }
-    .login-icon { font-size: 3rem; margin-bottom: 10px; }
-    .login-card h2 { font-size: 1.5rem; margin-bottom: 6px; color: var(--text-main); }
-    .login-card p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 25px; }
+
+    .login-icon {
+      font-size: 3rem;
+      margin-bottom: 10px;
+    }
+
+    .login-card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 6px;
+      color: var(--text-main);
+    }
+
+    .login-card p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 25px;
+    }
 
     /* MODALES */
     .modal-overlay {
-      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.55); z-index: 9999; align-items: center; justify-content: center; padding: 15px;
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.55);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      padding: 15px;
     }
+
     .modal-box {
-      background: var(--bg-card); padding: 22px; border-radius: 14px;
-      width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      background: var(--bg-card);
+      padding: 22px;
+      border-radius: 14px;
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
     }
 
     /* TOAST */
-    #toast-container { position: fixed; top: 15px; right: 15px; z-index: 99999; display: flex; flex-direction: column; gap: 8px; max-width: 90%; }
-    .toast { padding: 12px 18px; border-radius: 8px; color: white; font-weight: 600; font-size: 0.85rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: slideIn 0.3s ease; }
-    .toast.success { background: #10b981; }
-    .toast.error { background: #ef4444; }
-    .toast.warning { background: #f59e0b; }
-    .toast.info { background: #3b82f6; }
-    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    #toast-container {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-width: 90%;
+    }
+
+    .toast {
+      padding: 12px 18px;
+      border-radius: 8px;
+      color: white;
+      font-weight: 600;
+      font-size: 0.85rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      animation: slideIn 0.3s ease;
+    }
+
+    .toast.success {
+      background: #10b981;
+    }
+
+    .toast.error {
+      background: #ef4444;
+    }
+
+    .toast.warning {
+      background: #f59e0b;
+    }
+
+    .toast.info {
+      background: #3b82f6;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
 
     @media (max-width: 600px) {
-      .stats-grid { grid-template-columns: 1fr; }
-      .form-grid { grid-template-columns: 1fr !important; }
-      .header-info h1 { font-size: 1.15rem; }
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr !important;
+      }
+
+      .header-info h1 {
+        font-size: 1.15rem;
+      }
     }
   </style>
 </head>
+
 <body>
   <div id="toast-container"></div>
 
@@ -199,7 +536,9 @@
         </button>
       </form>
       <div style="margin-top: 20px; font-size: 0.75rem; color: var(--text-muted);">
-        <button type="button" onclick="abrirModalConfig()" style="background: none; border: none; color: #3b82f6; cursor: pointer; font-size: 0.75rem;">⚙️ Configurar claves de Supabase</button>
+        <button type="button" onclick="abrirModalConfig()"
+          style="background: none; border: none; color: #3b82f6; cursor: pointer; font-size: 0.75rem;">⚙️ Configurar
+          claves de Supabase</button>
       </div>
     </div>
   </div>
@@ -207,11 +546,12 @@
   <!-- PANTALLA PRINCIPAL -->
   <div id="vistaApp" style="display: none;">
     <div class="container">
-      
+
       <!-- AVISO DE CONFIGURACIÓN -->
       <div id="configWarningBanner">
         <span>⚠️ <strong>Falta configurar Supabase:</strong> Ingresa tu URL y clave de Supabase.</span>
-        <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.75rem;" onclick="abrirModalConfig()">Configurar</button>
+        <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.75rem;"
+          onclick="abrirModalConfig()">Configurar</button>
       </div>
 
       <!-- HEADER -->
@@ -240,19 +580,25 @@
 
       <!-- DASHBOARD (SOLO ADMIN) -->
       <div id="dashboard" class="tab-content active solo-admin">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+        <div
+          style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
           <h2>Resumen del Sistema</h2>
           <div class="form-grid" style="margin: 0; grid-template-columns: 1fr 1fr auto; align-items: end;">
-            <div class="form-group" style="margin: 0;"><label style="font-size:0.75rem;">Desde</label><input type="date" id="dashDesde" onchange="cargarDashboard()" style="padding:6px;"></div>
-            <div class="form-group" style="margin: 0;"><label style="font-size:0.75rem;">Hasta</label><input type="date" id="dashHasta" onchange="cargarDashboard()" style="padding:6px;"></div>
-            <button class="btn btn-primary" onclick="cargarDashboard()" style="padding:8px 12px; height:34px;">🔄</button>
+            <div class="form-group" style="margin: 0;"><label style="font-size:0.75rem;">Desde</label><input type="date"
+                id="dashDesde" onchange="cargarDashboard()" style="padding:6px;"></div>
+            <div class="form-group" style="margin: 0;"><label style="font-size:0.75rem;">Hasta</label><input type="date"
+                id="dashHasta" onchange="cargarDashboard()" style="padding:6px;"></div>
+            <button class="btn btn-primary" onclick="cargarDashboard()"
+              style="padding:8px 12px; height:34px;">🔄</button>
           </div>
         </div>
 
-        <div class="stat-card" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); margin-bottom: 15px; text-align: center; padding: 20px;">
+        <div class="stat-card"
+          style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); margin-bottom: 15px; text-align: center; padding: 20px;">
           <h3 style="font-size: 0.95rem; letter-spacing: 1px;">INGRESO TOTAL DEL PERÍODO</h3>
           <div class="stat-value" id="statIngresoTotal" style="font-size: 2.3rem;">$0</div>
-          <p style="font-size: 0.8rem; opacity: 0.9; margin-top: 3px;">Suma de alquileres, taquilla y ganancias de ventas</p>
+          <p style="font-size: 0.8rem; opacity: 0.9; margin-top: 3px;">Suma de alquileres, taquilla y ganancias de
+            ventas</p>
         </div>
 
         <div class="stats-grid">
@@ -299,8 +645,16 @@
 
         <h3 style="margin: 15px 0 10px 0; font-size: 1.05rem;">Alertas de Inventario</h3>
         <div class="stats-grid">
-          <div class="stat-card warning"><h3>Stock Bajo</h3><div class="stat-value" id="statStockBajo">0</div><p style="font-size:0.8rem;">Por debajo del mínimo</p></div>
-          <div class="stat-card warning"><h3>Sin Stock</h3><div class="stat-value" id="statSinStock">0</div><p style="font-size:0.8rem;">Agotados</p></div>
+          <div class="stat-card warning">
+            <h3>Stock Bajo</h3>
+            <div class="stat-value" id="statStockBajo">0</div>
+            <p style="font-size:0.8rem;">Por debajo del mínimo</p>
+          </div>
+          <div class="stat-card warning">
+            <h3>Sin Stock</h3>
+            <div class="stat-value" id="statSinStock">0</div>
+            <p style="font-size:0.8rem;">Agotados</p>
+          </div>
         </div>
       </div>
 
@@ -315,18 +669,47 @@
                 <option value="">-- Seleccione --</option>
               </select>
             </div>
-            <div class="form-group"><label for="alquilerFecha">Fecha</label><input type="date" id="alquilerFecha" required></div>
-            <div class="form-group"><label for="alquilerCantidad">Cantidad</label><input type="number" id="alquilerCantidad" min="1" value="1" required oninput="calcularTotalAlquiler()"></div>
-            <div class="form-group"><label>Total a Cobrar</label><input type="text" id="alquilerTotal" readonly style="background:#e2e8f0; font-weight:bold; color:#1e293b;"></div>
+            <div class="form-group"><label for="alquilerFecha">Fecha</label><input type="date" id="alquilerFecha"
+                required></div>
+            <div class="form-group"><label for="alquilerCantidad">Cantidad</label><input type="number"
+                id="alquilerCantidad" min="1" value="1" required oninput="calcularTotalAlquiler()"></div>
+            <div class="form-group"><label>Total a Cobrar</label><input type="text" id="alquilerTotal" readonly
+                style="background:#e2e8f0; font-weight:bold; color:#1e293b;"></div>
           </div>
-          <div class="form-group" style="margin-bottom:15px;"><label for="alquilerObs">Observaciones / Cliente</label><input type="text" id="alquilerObs" placeholder="Ej: Cliente Juan Pérez..."></div>
+          <div class="form-group" style="margin-bottom:15px;"><label for="alquilerObs">Observaciones /
+              Cliente</label><input type="text" id="alquilerObs" placeholder="Ej: Cliente Juan Pérez..."></div>
           <button type="submit" class="btn btn-primary" id="btnAlquiler">Registrar Alquiler</button>
         </form>
-        <div class="table-container">
-          <table>
-            <thead><tr><th>Fecha</th><th>Canoa</th><th>Cant.</th><th>Total</th><th>Observaciones</th></tr></thead>
-            <tbody id="tablaAlquileresBody"></tbody>
-          </table>
+        <!-- Filtros historial alquileres -->
+        <div style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 15px;">
+          <div
+            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+            <h3 style="font-size:1rem; margin:0;">📋 Registros de Alquiler</h3>
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+              <input type="date" id="alqFiltroDesde" onchange="cargarTablaAlquileres()"
+                style="padding:6px 8px; border:2px solid var(--border-color); border-radius:8px; background:var(--input-bg); color:var(--text-main); font-size:0.8rem;">
+              <span style="font-size:0.8rem; color:var(--text-muted);">al</span>
+              <input type="date" id="alqFiltroHasta" onchange="cargarTablaAlquileres()"
+                style="padding:6px 8px; border:2px solid var(--border-color); border-radius:8px; background:var(--input-bg); color:var(--text-main); font-size:0.8rem;">
+              <input type="text" id="alqFiltroCanoaNombre" placeholder="🔍 Canoa..." oninput="cargarTablaAlquileres()"
+                style="padding:6px 8px; border:2px solid var(--border-color); border-radius:8px; background:var(--input-bg); color:var(--text-main); font-size:0.8rem; width:130px;">
+            </div>
+          </div>
+          <div id="alqTotalesBar" style="margin-bottom:10px;"></div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Canoa</th>
+                  <th>Cant.</th>
+                  <th>Total</th>
+                  <th>Observaciones</th>
+                </tr>
+              </thead>
+              <tbody id="tablaAlquileresBody"></tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -335,41 +718,94 @@
         <h2 style="margin-bottom: 15px; font-size: 1.25rem;">Registro de Taquilla</h2>
         <form id="formTaquilla" onsubmit="registrarTaquilla(event)">
           <div class="form-grid">
-            <div class="form-group"><label for="taquillaFecha">Fecha</label><input type="date" id="taquillaFecha" required></div>
-            <div class="form-group"><label for="taquillaCarros">Carros ($30.000)</label><input type="number" id="taquillaCarros" min="0" value="0" required></div>
-            <div class="form-group"><label for="taquillaTuristas">Turistas ($20.000)</label><input type="number" id="taquillaTuristas" min="0" value="0" required></div>
-            <div class="form-group"><label for="taquillaParticulares">Particulares ($10.000)</label><input type="number" id="taquillaParticulares" min="0" value="0" required></div>
+            <div class="form-group"><label for="taquillaFecha">Fecha</label><input type="date" id="taquillaFecha"
+                required></div>
+            <div class="form-group"><label for="taquillaCarros">Carros ($30.000)</label><input type="number"
+                id="taquillaCarros" min="0" value="0" required></div>
+            <div class="form-group"><label for="taquillaTuristas">Turistas ($20.000)</label><input type="number"
+                id="taquillaTuristas" min="0" value="0" required></div>
+            <div class="form-group"><label for="taquillaParticulares">Particulares ($10.000)</label><input type="number"
+                id="taquillaParticulares" min="0" value="0" required></div>
           </div>
-          
+
           <h4 style="margin: 15px 0 8px 0; color: var(--text-muted); font-size: 0.95rem;">Restaurante ($25.000 c/u)</h4>
           <div class="form-grid">
-            <div class="form-group"><label for="taquillaDesayunos">Desayunos</label><input type="number" id="taquillaDesayunos" min="0" value="0" required></div>
-            <div class="form-group"><label for="taquillaAlmuerzos">Almuerzos</label><input type="number" id="taquillaAlmuerzos" min="0" value="0" required></div>
-            <div class="form-group"><label for="taquillaComidas">Comidas</label><input type="number" id="taquillaComidas" min="0" value="0" required></div>
+            <div class="form-group"><label for="taquillaDesayunos">Desayunos</label><input type="number"
+                id="taquillaDesayunos" min="0" value="0" required></div>
+            <div class="form-group"><label for="taquillaAlmuerzos">Almuerzos</label><input type="number"
+                id="taquillaAlmuerzos" min="0" value="0" required></div>
+            <div class="form-group"><label for="taquillaComidas">Comidas</label><input type="number"
+                id="taquillaComidas" min="0" value="0" required></div>
           </div>
-          <button type="submit" class="btn btn-primary" id="btnTaquilla" style="margin-top: 10px;">Registrar Taquilla</button>
+          <button type="submit" class="btn btn-primary" id="btnTaquilla" style="margin-top: 10px;">Registrar
+            Taquilla</button>
         </form>
-        <div class="table-container">
-          <table>
-            <thead><tr><th>Fecha</th><th>Concepto</th><th>Cant.</th><th>Recaudo</th></tr></thead>
-            <tbody id="tablaTaquillaBody"></tbody>
-          </table>
+        <!-- Filtros historial taquilla -->
+        <div style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 15px;">
+          <div
+            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+            <h3 style="font-size:1rem; margin:0;">📋 Registros de Taquilla</h3>
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+              <input type="date" id="taqFiltroDesde" onchange="cargarTablaTaquilla()"
+                style="padding:6px 8px; border:2px solid var(--border-color); border-radius:8px; background:var(--input-bg); color:var(--text-main); font-size:0.8rem;">
+              <span style="font-size:0.8rem; color:var(--text-muted);">al</span>
+              <input type="date" id="taqFiltroHasta" onchange="cargarTablaTaquilla()"
+                style="padding:6px 8px; border:2px solid var(--border-color); border-radius:8px; background:var(--input-bg); color:var(--text-main); font-size:0.8rem;">
+            </div>
+          </div>
+          <div id="taqTotalesBar" style="margin-bottom:10px;"></div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Concepto</th>
+                  <th>Cant.</th>
+                  <th>Recaudo</th>
+                </tr>
+              </thead>
+              <tbody id="tablaTaquillaBody"></tbody>
+            </table>
+          </div>
         </div>
       </div>
 
       <!-- INVENTARIO (ADMIN) -->
       <div id="inventario" class="tab-content solo-admin">
         <h2 style="margin-bottom: 15px; font-size: 1.25rem;">Inventario de Productos</h2>
-        <div class="form-grid">
-          <div class="form-group"><label>Buscar Producto</label><input type="text" id="buscarStock" placeholder="Código o nombre..." oninput="filtrarStock()"></div>
+        <div class="form-grid" style="grid-template-columns: 1fr 1fr auto auto auto;">
+          <div class="form-group"><label>Buscar Producto</label><input type="text" id="buscarStock"
+              placeholder="Código o nombre..." oninput="filtrarStock()"></div>
+          <div class="form-group"><label>Estado</label><select id="filtroEstadoInv" onchange="filtrarStock()">
+              <option value="">Todos</option>
+              <option value="ACTIVO">Activo</option>
+              <option value="INACTIVO">Inactivo</option>
+            </select></div>
+          <div class="form-group"><label>Stock</label><select id="filtroAlertaInv" onchange="filtrarStock()">
+              <option value="">Todos</option>
+              <option value="agotado">Agotados</option>
+              <option value="bajo">Stock Bajo</option>
+              <option value="normal">Normal</option>
+            </select></div>
           <div style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap;">
-             <button class="btn btn-primary" onclick="abrirModalMovimiento()">+ Movimiento</button>
-             <button class="btn btn-secondary" onclick="cargarInventario()">🔄 Actualizar</button>
+            <button class="btn btn-success" onclick="abrirModalNuevoProducto()">➕ Nuevo</button>
+            <button class="btn btn-primary" onclick="abrirModalMovimiento()">+ Mov.</button>
+            <button class="btn btn-secondary" onclick="cargarInventario()">🔄</button>
           </div>
         </div>
         <div class="table-container">
           <table>
-            <thead><tr><th>Cód.</th><th>Nombre</th><th>Stock</th><th>Costo</th><th>Venta</th><th>Estado</th><th>Acción</th></tr></thead>
+            <thead>
+              <tr>
+                <th>Cód.</th>
+                <th>Nombre</th>
+                <th>Stock</th>
+                <th>Costo</th>
+                <th>Venta</th>
+                <th>Estado</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
             <tbody id="tablaInventarioBody"></tbody>
           </table>
         </div>
@@ -382,12 +818,30 @@
           <div class="form-grid">
             <div class="form-group"><label>Desde</label><input type="date" id="fechaDesde" required></div>
             <div class="form-group"><label>Hasta</label><input type="date" id="fechaHasta" required></div>
-            <div class="form-group" style="justify-content:flex-end;"><button type="submit" class="btn btn-primary">Filtrar</button></div>
+            <div class="form-group"><label>Tipo</label><select id="histFiltroTipo">
+                <option value="">Todos</option>
+                <option value="INGRESO">Ingreso / Compra</option>
+                <option value="SALIDA">Salida / Venta</option>
+              </select></div>
+            <div class="form-group"><label>Buscar producto</label><input type="text" id="histFiltroProd"
+                placeholder="Nombre..."></div>
+            <div class="form-group" style="justify-content:flex-end;"><button type="submit"
+                class="btn btn-primary">Filtrar</button></div>
           </div>
+          <div id="histTotalesBar" style="margin-top:8px;"></div>
         </form>
         <div class="table-container">
           <table>
-            <thead><tr><th>Fecha</th><th>Tipo</th><th>Producto</th><th>Cant.</th><th>Total</th><th>Registrado Por</th></tr></thead>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Tipo</th>
+                <th>Producto</th>
+                <th>Cant.</th>
+                <th>Total</th>
+                <th>Registrado Por</th>
+              </tr>
+            </thead>
             <tbody id="tablaHistorialBody"></tbody>
           </table>
         </div>
@@ -398,16 +852,30 @@
         <h2 style="margin-bottom: 15px; font-size: 1.25rem;">Generar Factura de Venta</h2>
         <form id="formFactura" onsubmit="generarFactura(event)">
           <div class="form-grid">
-            <div class="form-group"><label>Cliente</label><input type="text" id="clienteFactura" required placeholder="Nombre o Razón Social"></div>
-            <div class="form-group"><label>NIT / Cédula</label><input type="text" id="nitFactura" required placeholder="C.C. o NIT"></div>
+            <div class="form-group"><label>Cliente</label><input type="text" id="clienteFactura" required
+                placeholder="Nombre o Razón Social"></div>
+            <div class="form-group"><label>NIT / Cédula</label><input type="text" id="nitFactura" required
+                placeholder="C.C. o NIT"></div>
           </div>
-          <div style="background:var(--bg-tabs); padding:14px; border-radius:10px; margin-bottom:15px; border: 1px solid var(--border-color);">
+          <div
+            style="background:var(--bg-tabs); padding:14px; border-radius:10px; margin-bottom:15px; border: 1px solid var(--border-color);">
             <div class="form-grid">
-              <div class="form-group"><label>Código Item</label><input type="text" id="codigoProductoItem" placeholder="Ej: 11, 1"></div>
-              <div class="form-group"><label>Cantidad</label><input type="number" id="cantidadItem" min="1" value="1"></div>
-              <div class="form-group" style="justify-content:flex-end;"><button type="button" class="btn btn-primary" onclick="agregarItem()">+ Agregar Item</button></div>
+              <div class="form-group" style="position:relative;">
+                <label>Buscar Producto</label>
+                <input type="text" id="buscarProductoItem" placeholder="Escriba nombre del producto..."
+                  oninput="buscarParaFactura()" autocomplete="off">
+                <input type="hidden" id="codigoProductoItem">
+                <div id="dropdownFactura"
+                  style="display:none; position:absolute; top:100%; left:0; right:0; background:var(--bg-card); border:2px solid var(--primary-color); border-radius:0 0 8px 8px; z-index:1000; max-height:200px; overflow-y:auto; box-shadow:0 6px 16px rgba(0,0,0,0.15);">
+                </div>
+              </div>
+              <div class="form-group"><label>Cantidad</label><input type="number" id="cantidadItem" min="1" value="1">
+              </div>
+              <div class="form-group" style="justify-content:flex-end;"><button type="button" class="btn btn-primary"
+                  onclick="agregarItem()">+ Agregar Item</button></div>
             </div>
-            <div id="itemsList" style="margin-top:10px; font-size:0.85rem; color:var(--text-muted);">No hay items agregados</div>
+            <div id="itemsList" style="margin-top:10px; font-size:0.85rem; color:var(--text-muted);">No hay items
+              agregados</div>
           </div>
           <button type="submit" class="btn btn-success" id="btnFactura">🧾 Generar Factura</button>
         </form>
@@ -431,15 +899,20 @@
           <input type="text" id="editNombre" required>
         </div>
         <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
-          <div class="form-group"><label>Precio Costo ($)</label><input type="number" id="editPrecioCosto" min="0" step="any" required></div>
-          <div class="form-group"><label>Precio Venta ($)</label><input type="number" id="editPrecioVenta" min="0" step="any" required></div>
+          <div class="form-group"><label>Precio Costo ($)</label><input type="number" id="editPrecioCosto" min="0"
+              step="any" required></div>
+          <div class="form-group"><label>Precio Venta ($)</label><input type="number" id="editPrecioVenta" min="0"
+              step="any" required></div>
         </div>
         <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
-          <div class="form-group"><label>Stock Mínimo</label><input type="number" id="editStockMin" min="0" required></div>
-          <div class="form-group"><label>Unidad</label><input type="text" id="editUnidad" placeholder="Unidades, Litros..."></div>
+          <div class="form-group"><label>Stock Mínimo</label><input type="number" id="editStockMin" min="0" required>
+          </div>
+          <div class="form-group"><label>Unidad</label><input type="text" id="editUnidad"
+              placeholder="Unidades, Litros..."></div>
         </div>
         <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:12px;">
-          <div class="form-group"><label>Grupo</label><input type="text" id="editGrupo" placeholder="General, Bebidas..."></div>
+          <div class="form-group"><label>Grupo</label><input type="text" id="editGrupo"
+              placeholder="General, Bebidas..."></div>
           <div class="form-group">
             <label>Tipo</label>
             <select id="editTipo" required>
@@ -469,16 +942,74 @@
     <div class="modal-box">
       <h3 style="margin-bottom:12px; font-size: 1.2rem;">Registrar Movimiento de Inventario</h3>
       <form id="formMovimiento" onsubmit="registrarMovimiento(event)">
-        <div class="form-group" style="margin-bottom:12px;"><label>Producto</label><select id="movProducto" required></select></div>
+        <div class="form-group" style="margin-bottom:12px;"><label>Producto</label><select id="movProducto"
+            required></select></div>
         <div class="form-grid">
-          <div class="form-group"><label>Tipo</label><select id="movTipo" required><option value="INGRESO">Compra / Entrada</option><option value="SALIDA">Venta / Salida</option></select></div>
+          <div class="form-group"><label>Tipo</label><select id="movTipo" required>
+              <option value="INGRESO">Compra / Entrada</option>
+              <option value="SALIDA">Venta / Salida</option>
+            </select></div>
           <div class="form-group"><label>Cantidad</label><input type="number" id="movCantidad" min="1" required></div>
         </div>
-        <div class="form-group" style="margin-bottom:15px;"><label>Observaciones</label><input type="text" id="movObs" placeholder="Ej: Compra proveedor..."></div>
+        <div class="form-group" style="margin-bottom:15px;"><label>Observaciones</label><input type="text" id="movObs"
+            placeholder="Ej: Compra proveedor..."></div>
         <div style="display:flex; gap:8px; justify-content:flex-end;">
           <button type="button" class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
           <button type="submit" class="btn btn-primary">Guardar</button>
         </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: NUEVO PRODUCTO -->
+  <div id="modalNuevoProducto" class="modal-overlay">
+    <div class="modal-box">
+      <h3 style="margin-bottom:12px; font-size: 1.2rem;">➕ Nuevo Producto / Servicio</h3>
+      <form id="formNuevoProducto" onsubmit="crearProducto(event)">
+          <div class="form-grid" style="grid-template-columns: 1fr 2fr; gap:10px; margin-bottom:10px;">
+            <div class="form-group">
+              <label>Código (opcional)</label>
+              <input type="text" id="nuevoCodigo" placeholder="Auto si está vacío">
+            </div>
+            <div class="form-group">
+              <label>Nombre del Producto / Servicio *</label>
+              <input type="text" id="nuevoNombre" required placeholder="Ej: Cerveza Club, Agua 500ml, Sombrero...">
+            </div>
+          </div>
+          <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+            <div class="form-group"><label>Precio Costo ($)</label><input type="number" id="nuevoPrecioCosto" min="0"
+                step="any" value="0" required></div>
+            <div class="form-group"><label>Precio Venta ($)</label><input type="number" id="nuevoPrecioVenta" min="0"
+                step="any" value="0" required></div>
+          </div>
+          <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+            <div class="form-group">
+              <label>Tipo *</label>
+              <select id="nuevoTipo" required>
+                <option value="INVENTARIO">INVENTARIO (tiene stock)</option>
+                <option value="ALQUILER">ALQUILER (canoa, etc.)</option>
+                <option value="SERVICIO">SERVICIO (taquilla, etc.)</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Grupo</label><input type="text" id="nuevoGrupo"
+                placeholder="Bebidas, Snacks, General..."></div>
+          </div>
+          <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+            <div class="form-group"><label>Unidad</label><input type="text" id="nuevoUnidad"
+                placeholder="Unidades, Litros..." value="Unidades"></div>
+            <div class="form-group"><label>Stock Mínimo</label><input type="number" id="nuevoStockMin" min="0" value="0"
+                required></div>
+          </div>
+          <div class="form-group" style="margin-bottom:16px;">
+            <label>Stock Inicial</label>
+            <input type="number" id="nuevoStockInicial" min="0" value="0">
+            <small style="color:var(--text-muted); font-size:0.75rem; margin-top:3px; display:block;">Se registrará
+              automáticamente como movimiento INGRESO</small>
+          </div>
+          <div style="display:flex; gap:8px; justify-content:flex-end;">
+            <button type="button" class="btn btn-secondary" onclick="cerrarModalNuevoProducto()">Cancelar</button>
+            <button type="submit" class="btn btn-success" id="btnCrearProducto">✅ Crear Producto</button>
+          </div>
       </form>
     </div>
   </div>
@@ -488,7 +1019,8 @@
     <div class="modal-box">
       <h3 style="margin-bottom:10px; font-size: 1.2rem;">⚙️ Conexión con Supabase</h3>
       <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">
-        Pega aquí los datos de tu proyecto de Supabase (Project Settings > API). Se guardan de forma segura en este navegador.
+        Pega aquí los datos de tu proyecto de Supabase (Project Settings > API). Se guardan de forma segura en este
+        navegador.
       </p>
       <div class="form-group" style="margin-bottom:12px;">
         <label>Project URL</label>
@@ -605,6 +1137,7 @@
         elementosAdmin.forEach(el => el.style.display = 'none');
         showTab(null, 'alquileres');
       }
+      cargarStockParaFactura();
     }
 
     function cerrarSesion() {
@@ -621,7 +1154,7 @@
     function showTab(event, tabName) {
       document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
-      
+
       const tabEl = document.getElementById(tabName);
       if (tabEl) tabEl.classList.add('active');
       if (event) event.currentTarget.classList.add('active');
@@ -743,6 +1276,8 @@
       if (!initSupabase()) return;
       const hoy = new Date().toISOString().split('T')[0];
       document.getElementById('alquilerFecha').value = hoy;
+      if (!document.getElementById('alqFiltroDesde').value) document.getElementById('alqFiltroDesde').value = hoy;
+      if (!document.getElementById('alqFiltroHasta').value) document.getElementById('alqFiltroHasta').value = hoy;
 
       try {
         const { data: canoas } = await sbClient.from('productos').select('*').eq('tipo', 'ALQUILER').order('nombre');
@@ -752,7 +1287,7 @@
           select.innerHTML += `<option value="${p.codigo}" data-precio="${p.precio_venta}" data-nombre="${p.nombre}">${p.nombre} ($${parseFloat(p.precio_venta).toLocaleString('es-CO')})</option>`;
         });
         cargarTablaAlquileres();
-      } catch (e) {}
+      } catch (e) { mostrarAlerta('Error cargando alquileres: ' + e.message, 'error'); }
     }
 
     function calcularTotalAlquiler() {
@@ -808,17 +1343,34 @@
 
     async function cargarTablaAlquileres() {
       const hoy = new Date().toISOString().split('T')[0];
+      const desde = document.getElementById('alqFiltroDesde')?.value || hoy;
+      const hasta = document.getElementById('alqFiltroHasta')?.value || hoy;
+      const filtroCanoaNombre = (document.getElementById('alqFiltroCanoaNombre')?.value || '').toLowerCase();
       try {
-        const { data: movs } = await sbClient.from('movimientos').select('*').eq('fecha', hoy).eq('tipo', 'SALIDA').order('id', { ascending: false });
+        const { data: movs } = await sbClient.from('movimientos').select('*').eq('tipo', 'SALIDA').gte('fecha', desde).lte('fecha', hasta).order('id', { ascending: false });
         const { data: prods } = await sbClient.from('productos').select('codigo, nombre, tipo');
         const prodMap = {};
         (prods || []).forEach(p => { prodMap[p.codigo] = p; });
 
         const tbody = document.getElementById('tablaAlquileresBody');
-        const filtered = (movs || []).filter(m => prodMap[m.codigo]?.tipo === 'ALQUILER');
+        let filtered = (movs || []).filter(m => prodMap[m.codigo]?.tipo === 'ALQUILER');
+        if (filtroCanoaNombre) filtered = filtered.filter(m => (prodMap[m.codigo]?.nombre || '').toLowerCase().includes(filtroCanoaNombre));
+
+        // Totales del período
+        const totalRec = filtered.reduce((a, m) => a + parseFloat(m.ganancia || 0), 0);
+        const totalCant = filtered.reduce((a, m) => a + parseFloat(m.cantidad || 0), 0);
+        const totBar = document.getElementById('alqTotalesBar');
+        if (totBar) {
+          if (filtered.length > 0) {
+            totBar.innerHTML = `<div style="display:inline-flex;gap:16px;align-items:center;background:linear-gradient(135deg,#8b5cf6,#6d28d9);padding:10px 18px;border-radius:10px;color:white;flex-wrap:wrap;">
+              <span style="font-size:0.82rem;opacity:0.9;">🛶 ${totalCant} alquiler(es)</span>
+              <span style="font-size:1.3rem;font-weight:800;">$${totalRec.toLocaleString('es-CO')}</span>
+            </div>`;
+          } else { totBar.innerHTML = ''; }
+        }
 
         if (filtered.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No hay alquileres registrados hoy</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No hay alquileres en el período seleccionado</td></tr>';
           return;
         }
 
@@ -831,15 +1383,25 @@
             <td>${m.observaciones || '-'}</td>
           </tr>
         `).join('');
-      } catch (e) {}
+      } catch (e) { mostrarAlerta('Error cargando tabla alquileres: ' + e.message, 'error'); }
     }
 
     /* ==================== TAQUILLA ==================== */
     async function cargarTaquilla() {
       const hoy = new Date().toISOString().split('T')[0];
       document.getElementById('taquillaFecha').value = hoy;
+      if (!document.getElementById('taqFiltroDesde').value) document.getElementById('taqFiltroDesde').value = hoy;
+      if (!document.getElementById('taqFiltroHasta').value) document.getElementById('taqFiltroHasta').value = hoy;
+      cargarTablaTaquilla();
+    }
+
+    async function cargarTablaTaquilla() {
+      if (!sbClient) return;
+      const hoy = new Date().toISOString().split('T')[0];
+      const desde = document.getElementById('taqFiltroDesde')?.value || hoy;
+      const hasta = document.getElementById('taqFiltroHasta')?.value || hoy;
       try {
-        const { data: movs } = await sbClient.from('movimientos').select('*').eq('fecha', hoy).eq('tipo', 'SALIDA').order('id', { ascending: false });
+        const { data: movs } = await sbClient.from('movimientos').select('*').eq('tipo', 'SALIDA').gte('fecha', desde).lte('fecha', hasta).order('id', { ascending: false });
         const { data: prods } = await sbClient.from('productos').select('codigo, nombre, tipo');
         const prodMap = {};
         (prods || []).forEach(p => { prodMap[p.codigo] = p; });
@@ -847,8 +1409,30 @@
         const tbody = document.getElementById('tablaTaquillaBody');
         const filtered = (movs || []).filter(m => prodMap[m.codigo]?.tipo === 'SERVICIO');
 
+        // Totales por concepto
+        let totCarros = 0, totTuristas = 0, totParticulares = 0, totRestaurante = 0;
+        filtered.forEach(m => {
+          const nom = (prodMap[m.codigo]?.nombre || '').toLowerCase();
+          const gan = parseFloat(m.ganancia || 0);
+          if (nom.includes('carro')) totCarros += gan;
+          else if (nom.includes('turista')) totTuristas += gan;
+          else if (nom.includes('particular')) totParticulares += gan;
+          else totRestaurante += gan;
+        });
+        const totBar = document.getElementById('taqTotalesBar');
+        if (totBar && filtered.length > 0) {
+          const total = totCarros + totTuristas + totParticulares + totRestaurante;
+          totBar.innerHTML = `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:4px;">
+            ${totCarros > 0 ? `<span class="badge badge-info" style="font-size:0.8rem;padding:5px 10px;">🚗 $${totCarros.toLocaleString('es-CO')}</span>` : ''}
+            ${totTuristas > 0 ? `<span class="badge badge-success" style="font-size:0.8rem;padding:5px 10px;">👥 $${totTuristas.toLocaleString('es-CO')}</span>` : ''}
+            ${totParticulares > 0 ? `<span class="badge badge-warning" style="font-size:0.8rem;padding:5px 10px;">👤 $${totParticulares.toLocaleString('es-CO')}</span>` : ''}
+            ${totRestaurante > 0 ? `<span class="badge badge-info" style="font-size:0.8rem;padding:5px 10px;">🍽️ $${totRestaurante.toLocaleString('es-CO')}</span>` : ''}
+            <span style="font-size:0.9rem;font-weight:700;color:var(--primary-color);">TOTAL: $${total.toLocaleString('es-CO')}</span>
+          </div>`;
+        } else if (totBar) { totBar.innerHTML = ''; }
+
         if (filtered.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="4" class="empty-state">No hay registros de taquilla hoy</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="4" class="empty-state">No hay registros de taquilla en el período seleccionado</td></tr>';
           return;
         }
 
@@ -860,7 +1444,7 @@
             <td>$${parseFloat(m.ganancia || 0).toLocaleString('es-CO')}</td>
           </tr>
         `).join('');
-      } catch (e) {}
+      } catch (e) { mostrarAlerta('Error cargando taquilla: ' + e.message, 'error'); }
     }
 
     async function registrarTaquilla(event) {
@@ -900,7 +1484,7 @@
         ['taquillaCarros', 'taquillaTuristas', 'taquillaParticulares', 'taquillaDesayunos', 'taquillaAlmuerzos', 'taquillaComidas'].forEach(id => {
           document.getElementById(id).value = 0;
         });
-        cargarTaquilla();
+        cargarTablaTaquilla();
         if (usuarioActual.rol === 'ADMIN') cargarDashboard();
       } catch (err) {
         btn.disabled = false; btn.textContent = 'Registrar Taquilla';
@@ -939,15 +1523,25 @@
 
     function filtrarStock() {
       const t = document.getElementById('buscarStock').value.toLowerCase();
+      const filtroEstado = document.getElementById('filtroEstadoInv')?.value || '';
+      const filtroAlerta = document.getElementById('filtroAlertaInv')?.value || '';
       const tbody = document.getElementById('tablaInventarioBody');
-      const filtered = stockGlobal.filter(p => p.nombre.toLowerCase().includes(t) || p.codigo.toLowerCase().includes(t));
+      let filtered = stockGlobal.filter(p => {
+        const matchText = p.nombre.toLowerCase().includes(t) || p.codigo.toString().toLowerCase().includes(t);
+        const matchEstado = !filtroEstado || p.estado === filtroEstado;
+        let matchAlerta = true;
+        if (filtroAlerta === 'agotado') matchAlerta = p.cantidad <= 0;
+        else if (filtroAlerta === 'bajo') matchAlerta = p.cantidad > 0 && p.cantidad <= p.stock_min && p.stock_min > 0;
+        else if (filtroAlerta === 'normal') matchAlerta = p.cantidad > (p.stock_min || 0);
+        return matchText && matchEstado && matchAlerta;
+      });
       if (filtered.length === 0) { tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No se encontraron productos</td></tr>'; return; }
       tbody.innerHTML = filtered.map(p => {
         let badge = p.cantidad <= 0 ? 'badge-danger' : (p.cantidad <= p.stock_min && p.stock_min > 0 ? 'badge-warning' : 'badge-success');
         let txt = p.cantidad <= 0 ? 'Agotado' : (p.cantidad <= p.stock_min && p.stock_min > 0 ? 'Bajo' : 'Normal');
         return `<tr>
           <td><strong>${p.codigo}</strong></td>
-          <td>${p.nombre}</td>
+          <td>${p.nombre}${p.grupo ? `<br><span style="font-size:0.7rem;color:var(--text-muted);">${p.grupo}</span>` : ''}</td>
           <td><strong>${p.cantidad}</strong><br><span class="badge ${badge}">${txt}</span></td>
           <td>$${parseFloat(p.precio_costo || 0).toLocaleString('es-CO')}</td>
           <td>$${parseFloat(p.precio_venta || 0).toLocaleString('es-CO')}</td>
@@ -1068,52 +1662,121 @@
       if (event) event.preventDefault();
       const desde = document.getElementById('fechaDesde').value;
       const hasta = document.getElementById('fechaHasta').value;
+      const filtroTipo = document.getElementById('histFiltroTipo')?.value || '';
+      const filtroProd = (document.getElementById('histFiltroProd')?.value || '').toLowerCase();
 
       try {
+        let query = sbClient.from('movimientos').select('*').gte('fecha', desde).lte('fecha', hasta).order('fecha', { ascending: false });
+        if (filtroTipo) query = query.eq('tipo', filtroTipo);
+
         const [{ data: movs }, { data: prods }] = await Promise.all([
-          sbClient.from('movimientos').select('*').gte('fecha', desde).lte('fecha', hasta).order('fecha', { ascending: false }),
+          query,
           sbClient.from('productos').select('codigo, nombre')
         ]);
 
         const prodMap = {};
         (prods || []).forEach(p => { prodMap[p.codigo] = p.nombre; });
 
-        const tbody = document.getElementById('tablaHistorialBody');
-        if (!movs || movs.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No hay movimientos</td></tr>'; return; }
+        let filtered = movs || [];
+        if (filtroProd) filtered = filtered.filter(m => (prodMap[m.codigo] || '').toLowerCase().includes(filtroProd) || m.codigo.toString().toLowerCase().includes(filtroProd));
 
-        tbody.innerHTML = movs.map(m => `
-          <tr>
+        // Totales
+        const totalGanancia = filtered.reduce((a, m) => a + parseFloat(m.ganancia || 0), 0);
+        const totBar = document.getElementById('histTotalesBar');
+        if (totBar) {
+          totBar.innerHTML = filtered.length > 0
+            ? `<div style="font-size:0.82rem;color:var(--text-muted);">${filtered.length} movimiento(s) · Total: <strong style="color:var(--primary-color);">$${totalGanancia.toLocaleString('es-CO')}</strong></div>`
+            : '';
+        }
+
+        const tbody = document.getElementById('tablaHistorialBody');
+        if (filtered.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No hay movimientos en el período seleccionado</td></tr>'; return; }
+
+        tbody.innerHTML = filtered.map(m => {
+          const tipoBadge = m.tipo === 'INGRESO' ? 'badge-success' : m.tipo === 'SALIDA' ? 'badge-info' : 'badge-warning';
+          return `<tr>
             <td>${m.fecha}</td>
-            <td><span class="badge badge-info">${m.tipo}</span></td>
+            <td><span class="badge ${tipoBadge}">${m.tipo}</span></td>
             <td>${prodMap[m.codigo] || m.codigo}</td>
             <td>${m.cantidad}</td>
             <td>$${parseFloat(m.ganancia || 0).toLocaleString('es-CO')}</td>
             <td>${m.usuario || '-'}</td>
-          </tr>
-        `).join('');
+          </tr>`;
+        }).join('');
       } catch (err) {
         mostrarAlerta('Error: ' + err.message, 'error');
       }
     }
 
     /* ==================== FACTURAS ==================== */
+    /* ==================== CATÁLOGO PARA FACTURAS (AUTOCOMPLETE) ==================== */
+    let stockParaFactura = [];
+
+    async function cargarStockParaFactura() {
+      if (!sbClient) return;
+      try {
+        const { data: prods } = await sbClient.from('productos').select('*').eq('estado', 'ACTIVO').order('nombre');
+        stockParaFactura = prods || [];
+      } catch (e) { }
+    }
+
+    function buscarParaFactura() {
+      const q = (document.getElementById('buscarProductoItem')?.value || '').toLowerCase().trim();
+      const dropdown = document.getElementById('dropdownFactura');
+      document.getElementById('codigoProductoItem').value = '';
+      if (!q) { dropdown.style.display = 'none'; return; }
+
+      const matches = stockParaFactura.filter(p =>
+        p.nombre.toLowerCase().includes(q) || p.codigo.toString().includes(q)
+      ).slice(0, 8);
+
+      if (matches.length === 0) { dropdown.style.display = 'none'; return; }
+
+      dropdown.innerHTML = matches.map(p => `
+        <div onclick="seleccionarProductoFactura('${p.codigo}', \`${p.nombre.replace(/`/g, '\\`')}\`, ${p.precio_venta})"
+          style="padding:9px 12px; cursor:pointer; border-bottom:1px solid var(--border-color); font-size:0.85rem; display:flex; justify-content:space-between; align-items:center; transition:background 0.1s;"
+          onmouseover="this.style.background='rgba(37,99,235,0.1)'" onmouseout="this.style.background=''">
+          <div>
+            <div style="font-weight:600;">${p.nombre}</div>
+            <div style="font-size:0.72rem;color:var(--text-muted);">${p.grupo || ''} · ${p.tipo}</div>
+          </div>
+          <span style="color:var(--primary-color);font-weight:700;white-space:nowrap;">$${parseFloat(p.precio_venta).toLocaleString('es-CO')}</span>
+        </div>
+      `).join('');
+      dropdown.style.display = 'block';
+    }
+
+    function seleccionarProductoFactura(codigo, nombre, precio) {
+      document.getElementById('buscarProductoItem').value = nombre;
+      document.getElementById('codigoProductoItem').value = codigo;
+      document.getElementById('dropdownFactura').style.display = 'none';
+      document.getElementById('cantidadItem').focus();
+      document.getElementById('cantidadItem').select();
+    }
+
     async function agregarItem() {
       const codigo = document.getElementById('codigoProductoItem').value.trim();
       const cantidad = parseFloat(document.getElementById('cantidadItem').value) || 0;
-      if (!codigo || cantidad <= 0) return mostrarAlerta('Datos inválidos', 'warning');
+      if (!codigo) return mostrarAlerta('Selecciona un producto del buscador', 'warning');
+      if (cantidad <= 0) return mostrarAlerta('La cantidad debe ser mayor a 0', 'warning');
 
-      try {
-        const { data: prod } = await sbClient.from('productos').select('*').eq('codigo', codigo).maybeSingle();
-        if (!prod) return mostrarAlerta('Producto no encontrado', 'error');
+      let prod = stockParaFactura.find(p => p.codigo.toString() === codigo.toString());
+      if (!prod) {
+        try {
+          const { data: prodDb } = await sbClient.from('productos').select('*').eq('codigo', codigo).maybeSingle();
+          if (!prodDb) return mostrarAlerta('Producto no encontrado', 'error');
+          prod = prodDb;
+        } catch (e) { mostrarAlerta('Error buscando producto', 'error'); return; }
+      }
 
-        const existente = facturasItems.find(i => i.codigo === codigo);
-        if (existente) existente.cantidad += cantidad;
-        else facturasItems.push({ codigo: prod.codigo, nombre: prod.nombre, cantidad: cantidad, precioUnitario: parseFloat(prod.precio_venta || 0) });
+      const existente = facturasItems.find(i => i.codigo.toString() === codigo.toString());
+      if (existente) existente.cantidad += cantidad;
+      else facturasItems.push({ codigo: prod.codigo, nombre: prod.nombre, cantidad, precioUnitario: parseFloat(prod.precio_venta || 0) });
 
-        renderItems();
-        document.getElementById('codigoProductoItem').value = '';
-        document.getElementById('cantidadItem').value = '1';
-      } catch (e) {}
+      renderItems();
+      document.getElementById('buscarProductoItem').value = '';
+      document.getElementById('codigoProductoItem').value = '';
+      document.getElementById('cantidadItem').value = '1';
     }
 
     function renderItems() {
@@ -1149,28 +1812,123 @@
         if (error) throw error;
 
         mostrarAlerta(`Factura ${numeroFactura} guardada con éxito`, 'success');
-        
-        // Ventana de impresión limpia
+
+        // Factura profesional
+        const fechaStr = new Date().toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' });
         const printWindow = window.open('', '_blank');
         printWindow.document.write(`
-          <html><head><title>${numeroFactura}</title><style>
-            body { font-family: Arial, sans-serif; padding: 25px; color: #1e293b; }
-            h1 { color: #1e3a8a; margin-bottom: 5px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-            th, td { border: 1px solid #cbd5e1; padding: 8px; font-size: 12px; }
-            th { background: #1e3a8a; color: white; }
-          </style></head><body>
-            <h1>MACOLLA - Finca Juriepe</h1>
-            <p><strong>Factura:</strong> ${numeroFactura} | <strong>Fecha:</strong> ${new Date().toLocaleDateString('es-CO')}</p>
-            <p><strong>Cliente:</strong> ${cliente} | <strong>NIT/CC:</strong> ${nit}</p>
-            <table>
-              <thead><tr><th>Cód.</th><th>Descripción</th><th>Cant.</th><th>Unitario</th><th>Subtotal</th></tr></thead>
-              <tbody>
-                ${facturasItems.map(i => `<tr><td>${i.codigo}</td><td>${i.nombre}</td><td>${i.cantidad}</td><td>$${i.precioUnitario.toLocaleString('es-CO')}</td><td>$${(i.cantidad * i.precioUnitario).toLocaleString('es-CO')}</td></tr>`).join('')}
-              </tbody>
-            </table>
-            <h2 style="text-align:right; margin-top:15px; color:#1e3a8a;">TOTAL: $${total.toLocaleString('es-CO')}</h2>
-            <script>window.print();<\/script>
+          <!DOCTYPE html><html><head><title>${numeroFactura}</title>
+          <meta charset="UTF-8">
+          <style>
+            @page { margin: 1.5cm; size: A4; }
+            * { box-sizing: border-box; margin: 0; padding: 0; }
+            body { font-family: Arial, Helvetica, sans-serif; color: #1e293b; font-size: 13px; }
+            .wrap { padding: 20px; }
+            .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #1e3a8a; padding-bottom: 16px; margin-bottom: 20px; }
+            .empresa-nombre { font-size: 26px; font-weight: 900; color: #1e3a8a; letter-spacing: -0.5px; }
+            .empresa-sub { font-size: 11px; color: #64748b; margin-top: 5px; }
+            .factura-meta { text-align: right; }
+            .factura-label { font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
+            .factura-numero { font-size: 20px; font-weight: 800; color: #1e3a8a; }
+            .badge-emitida { display:inline-block; background:#dcfce7; color:#166534; padding:2px 10px; border-radius:20px; font-size:10px; font-weight:700; margin-top:6px; }
+            .datos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 22px; }
+            .datos-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; }
+            .datos-box-label { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; font-weight: 700; }
+            .datos-valor { font-weight: 700; font-size: 14px; }
+            .datos-sub { font-size: 11px; color: #64748b; margin-top: 3px; }
+            table { width: 100%; border-collapse: collapse; }
+            thead tr { background: #1e3a8a; color: white; }
+            th { padding: 10px 10px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+            td { padding: 10px; border-bottom: 1px solid #e2e8f0; font-size: 12px; }
+            tbody tr:last-child td { border-bottom: none; }
+            tbody tr:nth-child(even) { background: #f8fafc; }
+            .col-right { text-align: right; }
+            .col-center { text-align: center; }
+            .total-section { margin-top: 16px; border-top: 2px solid #1e3a8a; padding-top: 12px; display: flex; justify-content: flex-end; align-items: baseline; gap: 20px; }
+            .total-label-txt { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
+            .total-valor { font-size: 28px; font-weight: 900; color: #1e3a8a; }
+            .firmas { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; margin-top: 65px; }
+            .firma-linea { border-top: 1px solid #94a3b8; padding-top: 7px; text-align: center; }
+            .firma-titulo { font-size: 11px; color: #64748b; }
+            .firma-nombre { font-size: 10px; color: #94a3b8; margin-top: 3px; }
+            .footer { text-align: center; margin-top: 35px; padding-top: 14px; border-top: 1px solid #e2e8f0; }
+            .footer p { font-size: 11px; color: #94a3b8; line-height: 1.6; }
+            .footer strong { color: #1e3a8a; }
+          </style></head>
+          <body><div class="wrap">
+          <div class="header">
+            <div>
+              <div style="font-size:11px;color:#94a3b8;margin-bottom:4px;">🏕️ SISTEMA DE GESTIÓN</div>
+              <div class="empresa-nombre">Finca Juriepe</div>
+              <div class="empresa-sub">MACOLLA · Control de Ventas e Inventario</div>
+            </div>
+            <div class="factura-meta">
+              <div class="factura-label">Número de Factura</div>
+              <div class="factura-numero">${numeroFactura}</div>
+              <div style="margin-top:8px;"><div class="factura-label">Fecha de Emisión</div>
+              <div style="font-weight:600;font-size:12px;margin-top:2px;">${fechaStr}</div></div>
+              <div class="badge-emitida">✓ Emitida</div>
+            </div>
+          </div>
+
+          <div class="datos-grid">
+            <div class="datos-box">
+              <div class="datos-box-label">👤 Cliente</div>
+              <div class="datos-valor">${cliente}</div>
+              <div class="datos-sub">NIT / Cédula: <strong>${nit}</strong></div>
+            </div>
+            <div class="datos-box">
+              <div class="datos-box-label">🏕️ Emisor</div>
+              <div class="datos-valor">Finca Juriepe</div>
+              <div class="datos-sub">Registrado por: <strong>${usuarioActual ? usuarioActual.nombre : 'Sistema'}</strong></div>
+              <div class="datos-sub">Fecha: ${new Date().toLocaleDateString('es-CO')}</div>
+            </div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th style="width:55px;">Cód.</th>
+                <th>Descripción del Producto / Servicio</th>
+                <th style="width:65px;" class="col-center">Cant.</th>
+                <th style="width:120px;" class="col-right">Precio Unit.</th>
+                <th style="width:130px;" class="col-right">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${facturasItems.map(i => `
+              <tr>
+                <td style="color:#94a3b8;font-size:11px;">${i.codigo}</td>
+                <td><strong>${i.nombre}</strong></td>
+                <td class="col-center">${i.cantidad}</td>
+                <td class="col-right">$${i.precioUnitario.toLocaleString('es-CO')}</td>
+                <td class="col-right"><strong>$${(i.cantidad * i.precioUnitario).toLocaleString('es-CO')}</strong></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+
+          <div class="total-section">
+            <span class="total-label-txt">Total a Pagar</span>
+            <span class="total-valor">$${total.toLocaleString('es-CO')}</span>
+          </div>
+
+          <div class="firmas">
+            <div class="firma-linea">
+              <div class="firma-titulo">Firma del Cliente</div>
+              <div class="firma-nombre">${cliente}</div>
+            </div>
+            <div class="firma-linea">
+              <div class="firma-titulo">Firma del Responsable</div>
+              <div class="firma-nombre">${usuarioActual ? usuarioActual.nombre : 'Sistema'} · Finca Juriepe</div>
+            </div>
+          </div>
+
+          <div class="footer">
+            <p>¡Gracias por visitarnos! · <strong>Finca Juriepe - Macolla</strong></p>
+            <p>Este documento es un comprobante de venta generado por el Sistema Macolla</p>
+          </div>
+          </div>
+          <script>window.print();<\/script>
           </body></html>
         `);
         printWindow.document.close();
@@ -1207,6 +1965,83 @@
       initSupabase();
     }
 
+    /* ==================== NUEVO PRODUCTO ==================== */
+    function abrirModalNuevoProducto() {
+      document.getElementById('formNuevoProducto').reset();
+      document.getElementById('nuevoUnidad').value = 'Unidades';
+      document.getElementById('modalNuevoProducto').style.display = 'flex';
+    }
+
+    function cerrarModalNuevoProducto() {
+      document.getElementById('modalNuevoProducto').style.display = 'none';
+    }
+
+    async function crearProducto(event) {
+      event.preventDefault();
+      const btn = document.getElementById('btnCrearProducto');
+      btn.disabled = true; btn.textContent = 'Creando...';
+
+      let codigo = document.getElementById('nuevoCodigo').value.trim();
+      const nombre = document.getElementById('nuevoNombre').value.trim();
+      const precioCosto = parseFloat(document.getElementById('nuevoPrecioCosto').value) || 0;
+      const precioVenta = parseFloat(document.getElementById('nuevoPrecioVenta').value) || 0;
+      const tipo = document.getElementById('nuevoTipo').value;
+      const grupo = document.getElementById('nuevoGrupo').value.trim() || 'General';
+      const unidad = document.getElementById('nuevoUnidad').value.trim() || 'Unidades';
+      const stockMin = parseInt(document.getElementById('nuevoStockMin').value) || 0;
+      const stockInicial = parseInt(document.getElementById('nuevoStockInicial').value) || 0;
+
+      try {
+        // Si el usuario no especificó un código manual, calculamos el siguiente código correlativo numérico
+        if (!codigo) {
+          const { data: todosProds } = await sbClient.from('productos').select('codigo');
+          let maxCod = 0;
+          (todosProds || []).forEach(p => {
+            const num = parseInt(p.codigo, 10);
+            if (!isNaN(num) && num > maxCod) maxCod = num;
+          });
+          codigo = String(maxCod + 1);
+        }
+
+        const { data: prod, error: errProd } = await sbClient.from('productos').insert([{
+          codigo,
+          nombre,
+          precio_costo: precioCosto,
+          precio_venta: precioVenta,
+          tipo,
+          grupo,
+          unidad,
+          stock_min: stockMin,
+          estado: 'ACTIVO'
+        }]).select().single();
+
+        if (errProd) throw errProd;
+
+        if (stockInicial > 0 && prod) {
+          await sbClient.from('movimientos').insert([{
+            codigo: prod.codigo,
+            fecha: new Date().toISOString().split('T')[0],
+            tipo: 'INGRESO',
+            cantidad: stockInicial,
+            observaciones: 'Stock inicial al crear producto',
+            usuario: usuarioActual ? usuarioActual.nombre : 'Sistema',
+            precio_costo: precioCosto,
+            precio_venta: precioVenta,
+            ganancia: 0
+          }]);
+        }
+
+        btn.disabled = false; btn.textContent = '✅ Crear Producto';
+        mostrarAlerta(`✅ Producto "${nombre}" (Cód: ${codigo}) creado con éxito`, 'success');
+        cerrarModalNuevoProducto();
+        cargarInventario();
+        cargarStockParaFactura();
+      } catch (err) {
+        btn.disabled = false; btn.textContent = '✅ Crear Producto';
+        mostrarAlerta('Error al crear producto: ' + err.message, 'error');
+      }
+    }
+
     /* ==================== TEMA ==================== */
     function toggleTheme() {
       document.body.classList.toggle('dark-mode');
@@ -1230,6 +2065,15 @@
 
       initSupabase();
 
+      // Cerrar dropdown de facturas al hacer clic fuera
+      document.addEventListener('click', (e) => {
+        const dropdown = document.getElementById('dropdownFactura');
+        const input = document.getElementById('buscarProductoItem');
+        if (dropdown && input && !input.contains(e.target) && !dropdown.contains(e.target)) {
+          dropdown.style.display = 'none';
+        }
+      });
+
       const sesion = localStorage.getItem('juriepe_sb_user');
       if (sesion) {
         try {
@@ -1242,4 +2086,5 @@
     };
   </script>
 </body>
+
 </html>
